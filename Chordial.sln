@@ -1,0 +1,40 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 14
+VisualStudioVersion = 14.0.23107.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Chordial", "Chordial\Chordial.csproj", "{6956EAC5-8BD8-401B-8A71-65EF0CD0A73D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Chordial.Kademlia", "Chordial.Kademlia\Chordial.Kademlia.csproj", "{51DC3847-6DB4-41B6-A74B-AECD7188FF9B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Chordial.Kademlia.Tests", "Chordial.Kademlia.Tests\Chordial.Kademlia.Tests.csproj", "{8DA7FA9C-E740-40E1-AB5A-D65E54F775FA}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Chordial.ConsoleExample", "Chordial.ConsoleExample\Chordial.ConsoleExample.csproj", "{62E85AF3-0038-4B49-A6CB-2302BFD40101}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{6956EAC5-8BD8-401B-8A71-65EF0CD0A73D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6956EAC5-8BD8-401B-8A71-65EF0CD0A73D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6956EAC5-8BD8-401B-8A71-65EF0CD0A73D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6956EAC5-8BD8-401B-8A71-65EF0CD0A73D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{51DC3847-6DB4-41B6-A74B-AECD7188FF9B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{51DC3847-6DB4-41B6-A74B-AECD7188FF9B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{51DC3847-6DB4-41B6-A74B-AECD7188FF9B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{51DC3847-6DB4-41B6-A74B-AECD7188FF9B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8DA7FA9C-E740-40E1-AB5A-D65E54F775FA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8DA7FA9C-E740-40E1-AB5A-D65E54F775FA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8DA7FA9C-E740-40E1-AB5A-D65E54F775FA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8DA7FA9C-E740-40E1-AB5A-D65E54F775FA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{62E85AF3-0038-4B49-A6CB-2302BFD40101}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{62E85AF3-0038-4B49-A6CB-2302BFD40101}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{62E85AF3-0038-4B49-A6CB-2302BFD40101}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{62E85AF3-0038-4B49-A6CB-2302BFD40101}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

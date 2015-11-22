@@ -1,0 +1,98 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
+using Ninject;
+using Ninject.Parameters;
+
+namespace Chordial.Kademlia
+{
+    public class KademliaServer : IKadmeliaServer
+    {
+        // Network State
+        private readonly IBucketList routingTable;
+        private readonly IStorage _storage;
+        private TimeSpan _allowedClockSkew = new TimeSpan(0, 30, 0);
+        private IKernel kernel;
+        private Contact myself;
+        public KademliaServer(IBucketList cache, IStorage storage, IKernel kernel)
+        {
+            this.kernel = kernel;
+            this.routingTable = cache;
+            this._storage = storage;
+            this.myself = cache.OurContact;
+        }
+
+        public SearchResult FindNode(Contact senderId, byte[] key)
+        {
+            routingTable.AddContact(senderId, myself, kernel);
+            var result = routingTable.CloseContacts(new ID(key), new ID(senderId.NodeId));
+            return new SearchResult() { Contacts = result.ToArray() };
+        }
+
+        public SearchResult FindValue(Contact senderId, byte[] key)
+        {
+            routingTable.AddContact(senderId, myself, kernel);
+            var storageItems = _storage.GetItems(key);
+            if (storageItems != null)
+                return new SearchResult() { Values = storageItems.Select(x => x.Value).ToArray() };
+
+            return FindNode(senderId, key);
+        }
+
+        public void StoreValue(Contact senderId, byte[] key, string data, DateTime published, DateTime expires)
+        {
+            //If published is older than expires that's silly
+            if (published > expires)
+                return;
+
+            //Published date shouldn't be too far in the past
+            if (published > (DateTime.UtcNow + _allowedClockSkew))
+                return;
+
+            //Expire date shouldn't be too far into the future
+            if ((expires - DateTime.UtcNow) > _allowedClockSkew)
+                return;
+
+            var hash = ID.Hash(data);
+
+            var item = new StorageItem()
+            {
+                Expires = expires,
+                PublicationDate = published,
+                Hash = hash.Data,
+                Key = key,
+                Value = data
+            };
+
+
+            _storage.PutItem(item);
+
+        }
+
+
+
+        public byte[] Ping(Contact senderId)
+        {
+            Log("I was pinged!");
+            routingTable.AddContact(senderId, myself, kernel);
+            return this.myself.NodeId;
+        }
+
+
+        /// <summary>
+        /// Log debug messages, if debugging is enabled.
+        /// </summary>
+        /// <param name="message"></param>
+        private void Log(string message)
+        {
+            Console.WriteLine(message);
+        }
+
+    }
+
+
+
+}
