@@ -38,7 +38,7 @@ namespace Chordial
         /// <param name="published"></param>
         /// <param name="expires"></param>
         [OperationContract]
-        void StoreValue(Contact senderId, byte[] key, string data, DateTime published, DateTime expires);
+        bool? StoreValue(Contact senderId, byte[] key, string data, DateTime published, DateTime expires);
 
         [OperationContract]
         byte[] Ping(Contact senderId);

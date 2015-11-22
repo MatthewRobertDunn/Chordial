@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Ninject;
 using Ninject.Parameters;
+using System.ServiceModel;
 
 namespace Chordial.Kademlia
 {
@@ -38,7 +39,7 @@ namespace Chordial.Kademlia
             this.server = new KademliaServer(cache, storage, kernel);
         }
 
-        
+
         public void StartServer(Uri myServerUri)
         {
 

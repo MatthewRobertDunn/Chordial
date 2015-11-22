@@ -6,9 +6,11 @@ using System.Threading;
 using System.Threading.Tasks;
 using Ninject;
 using Ninject.Parameters;
+using System.ServiceModel;
 
 namespace Chordial.Kademlia
 {
+    [ServiceBehavior(InstanceContextMode = InstanceContextMode.Single, ConcurrencyMode = ConcurrencyMode.Multiple)]
     public class KademliaServer : IKadmeliaServer
     {
         // Network State
@@ -42,19 +44,19 @@ namespace Chordial.Kademlia
             return FindNode(senderId, key);
         }
 
-        public void StoreValue(Contact senderId, byte[] key, string data, DateTime published, DateTime expires)
+        public bool? StoreValue(Contact senderId, byte[] key, string data, DateTime published, DateTime expires)
         {
             //If published is older than expires that's silly
             if (published > expires)
-                return;
+                return false;
 
             //Published date shouldn't be too far in the past
             if (published > (DateTime.UtcNow + _allowedClockSkew))
-                return;
+                return false;
 
             //Expire date shouldn't be too far into the future
             if ((expires - DateTime.UtcNow) > _allowedClockSkew)
-                return;
+                return false;
 
             var hash = ID.Hash(data);
 
@@ -70,6 +72,7 @@ namespace Chordial.Kademlia
 
             _storage.PutItem(item);
 
+            return true;
         }
 
 

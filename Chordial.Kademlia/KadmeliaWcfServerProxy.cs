@@ -13,10 +13,6 @@ namespace Chordial.Kademlia
 
         public event EventHandler<RemotePeerRespondedEventArgs> RemotePeerResponded;
 
-        public KadmeliaWcfServerProxy()
-        {
-        }
-
         public KadmeliaWcfServerProxy(string endpointConfigurationName) :
             base(endpointConfigurationName)
         {
@@ -38,28 +34,61 @@ namespace Chordial.Kademlia
         }
         public SearchResult FindNode(Contact senderId, byte[] key)
         {
-            return base.Channel.FindNode(senderId, key);
+            return ExceptionWrap(() => base.Channel.FindNode(senderId, key));
         }
 
         public SearchResult FindValue(Contact senderId, byte[] key)
         {
-            return base.Channel.FindValue(senderId, key);
+            return ExceptionWrap(() => base.Channel.FindValue(senderId, key));
         }
 
-        public void StoreValue(Contact senderId, byte[] key, string data, DateTime published, DateTime expires)
+        public bool? StoreValue(Contact senderId, byte[] key, string data, DateTime published, DateTime expires)
         {
-            base.Channel.StoreValue(senderId, key, data, published, expires);
+            return ExceptionWrap(() => (base.Channel.StoreValue(senderId, key, data, published, expires)));
         }
 
         public byte[] Ping(Contact senderId)
         {
-            return base.Channel.Ping(senderId);
+            return ExceptionWrap(() => (base.Channel.Ping(senderId)));
         }
 
         protected virtual void OnRemotePeerResponded(RemotePeerRespondedEventArgs e)
         {
             if (this.RemotePeerResponded != null)
                 this.RemotePeerResponded(this, e);
+        }
+
+        private T ExceptionWrap<T>(Func<T> wrap) where T : class
+        {
+            try
+            {
+                this.Open();
+                return wrap();
+            }
+            catch (Exception ex)
+            {
+                this.Abort();
+                return null;
+            }
+            finally
+            {
+                if (this.State == CommunicationState.Opened)
+                    this.Close();
+            }
+
+        }
+
+        private Nullable<T> ExceptionWrap<T>(Func<Nullable<T>> wrap) where T : struct
+        {
+            try
+            {
+                return wrap();
+            }
+            catch (Exception ex)
+            {
+                this.Abort();
+                return null;
+            }
         }
     }
 
