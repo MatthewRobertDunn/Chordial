@@ -5,6 +5,7 @@ using Ninject.Parameters;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.ServiceModel;
 using System.Text;
 using System.Threading.Tasks;
@@ -35,10 +36,10 @@ namespace Chordial.Kademlia
             var externalUri = new Uri($"net.tcp://{IpUtils.GetExternalIp()}:{port}");
             var peer = kernel.Get<IKadmeliaPeer>(new ConstructorArgument("myServerUri", externalUri));
 
-            var allIpUri = new Uri($"net.tcp://0:{port}");
+            var allIpUri = new Uri($"net.tcp://{Dns.GetHostName()}:{port}");
             var serviceHost = new ServiceHost(peer.Server, allIpUri);
 
-            var endPoints = serviceHost.AddDefaultEndpoints();
+            var endPoints = serviceHost.AddServiceEndpoint(typeof(IKadmeliaServer), new NetTcpBinding(), "");
 
             serviceHost.Open();
             ActiveHosts[port] = serviceHost;

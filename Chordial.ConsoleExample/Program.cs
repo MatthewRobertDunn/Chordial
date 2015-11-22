@@ -13,11 +13,11 @@ namespace Chordial.ConsoleExample
     class Program
     {
         static void Main(string[] args)
-        { 
+        {
 
-            var peer = PeerFactory.CreateTcpPeer(2456);
-
-
+            var peer1 = PeerFactory.CreateTcpPeer(2456);
+            peer1.Client.Booststrap(new[] { "net.tcp://eyeglobes.info:2456" });
+            Console.WriteLine("running");
             Console.ReadLine();
         }
     }

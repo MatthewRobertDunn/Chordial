@@ -32,7 +32,7 @@ namespace Chordial.Kademlia
         {
             this.kernel = kernel;
 
-            var id = ID.RandomID();
+            var id = ID.HostID();
             myself = new Contact() { NodeId = id.Data, Uri = myServerUri.ToString() };
             var cache = new BucketList(myself);
             this.client = new KademliaClient(cache, storage, kernel);

@@ -9,10 +9,6 @@ namespace Chordial.Kademlia
 {
     public class KadmeliaWcfServerProxy : ClientBase<IKadmeliaServer>, IKadmeliaServer
     {
-        private ID remoteId;
-
-        public event EventHandler<RemotePeerRespondedEventArgs> RemotePeerResponded;
-
         public KadmeliaWcfServerProxy(string endpointConfigurationName) :
             base(endpointConfigurationName)
         {
@@ -52,13 +48,7 @@ namespace Chordial.Kademlia
             return ExceptionWrap(() => (base.Channel.Ping(senderId)));
         }
 
-        protected virtual void OnRemotePeerResponded(RemotePeerRespondedEventArgs e)
-        {
-            if (this.RemotePeerResponded != null)
-                this.RemotePeerResponded(this, e);
-        }
-
-        private T ExceptionWrap<T>(Func<T> wrap) where T : class
+        private T ExceptionWrap<T>(Func<T> wrap)
         {
             try
             {
@@ -68,34 +58,13 @@ namespace Chordial.Kademlia
             catch (Exception ex)
             {
                 this.Abort();
-                return null;
+                return default(T);
             }
             finally
             {
                 if (this.State == CommunicationState.Opened)
                     this.Close();
             }
-
         }
-
-        private Nullable<T> ExceptionWrap<T>(Func<Nullable<T>> wrap) where T : struct
-        {
-            try
-            {
-                return wrap();
-            }
-            catch (Exception ex)
-            {
-                this.Abort();
-                return null;
-            }
-        }
-    }
-
-
-    public class RemotePeerRespondedEventArgs
-    {
-        public ID Peer { get; set; }
-        public string Url { get; set; }
     }
 }

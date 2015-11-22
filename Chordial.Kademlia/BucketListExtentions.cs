@@ -59,23 +59,24 @@ namespace Chordial.Kademlia
             if (blocker == null)
             {
                 _contactCache.Put(applicant);
+                return;
             }
-            else
+
+            //has the blocker been pinged recently?
+                        
+            
+            // We can't fit them. We have to choose between blocker and applicant
+            var remotePeerUri = blocker.ToUri();
+            var peer = kernel.Get<IKadmeliaServer>(remotePeerUri.Scheme, new ConstructorArgument("uri", remotePeerUri));
+
+            // If the blocker doesn't respond, pick the applicant.
+            var pingResult = peer.Ping(myself);
+            if (pingResult == null)
             {
-                // We can't fit them. We have to choose between blocker and applicant
-                var remotePeerUri = blocker.ToUri();
-                var peer = kernel.Get<IKadmeliaServer>(remotePeerUri.Scheme, new ConstructorArgument("uri", remotePeerUri));
-
-                // If the blocker doesn't respond, pick the applicant.
-                var pingResult = peer.Ping(myself);
-                if (pingResult == null)
-                {
-                    _contactCache.Remove(blocker.GetID());
-                    _contactCache.Put(applicant);
-                    Log("Chose applicant");
-                }
+                _contactCache.Remove(blocker.GetID());
+                _contactCache.Put(applicant);
+                Log("Chose applicant");
             }
-
             //Log(contactCache.ToString());
         }
 
