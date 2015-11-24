@@ -21,7 +21,7 @@ namespace Chordial.Kademlia
         // Network State
         private IBucketList routingTable;
 
-        private IKernel kernel;
+        private Func<Uri, IKadmeliaServer> serverFactory;
         private IStorage dataStore;
 
         //Whoami
@@ -31,11 +31,11 @@ namespace Chordial.Kademlia
         /// Make a node on a specific port, with a specified ID
         /// </summary>
         /// <param name="port"></param>
-        public KademliaClient(IBucketList cache, IStorage dataStore, IKernel kernel)
+        public KademliaClient(IBucketList cache, IStorage dataStore, Func<Uri, IKadmeliaServer> serverFactory)
         {
             this.routingTable = cache;
             this.dataStore = dataStore;
-            this.kernel = kernel;
+            this.serverFactory = serverFactory;
             myself = cache.OurContact;
         }
 
@@ -51,13 +51,13 @@ namespace Chordial.Kademlia
             foreach (var uri in bootstrapPeerUris)
             {
                 var remotePeerUri = new Uri(uri);
-                var bootstrapPeer = kernel.Get<IKadmeliaServer>(remotePeerUri.Scheme, new Parameter("uri", remotePeerUri, false));
+                var bootstrapPeer = serverFactory(remotePeerUri);
 
                 //Get the remote peers ID, pass it my own contact details
                 var remotePeerID = bootstrapPeer.Ping(myself);
                 //Add this peer to my routing table if alive
                 if (remotePeerID != null)
-                    routingTable.AddContact(new Contact() { NodeId = remotePeerID, Uri = uri }, myself, kernel);
+                    routingTable.AddContact(new Contact() { NodeId = remotePeerID, Uri = uri });
             }
 
             //Perform an iterative search for myself, this will populate my routing table further
@@ -82,7 +82,7 @@ namespace Chordial.Kademlia
                     Values = localStore.Select(x => x.Value).ToList(),
                     TargetPeer = this.routingTable.OurContact,
                 };
-            
+
             var result = IterativeFind(new ID(key), true);
             return result;
         }
@@ -100,7 +100,7 @@ namespace Chordial.Kademlia
             foreach (Contact c in closest.ClosestPeers.Take(replicationFactor))
             {
                 var remotePeerUri = c.ToUri();
-                var peer = kernel.Get<IKadmeliaServer>(remotePeerUri.Scheme, new ConstructorArgument("uri", remotePeerUri));
+                var peer = serverFactory(remotePeerUri);
                 peer.StoreValue(myself, key.Data, val, originalInsertion, expires);
             }
 
@@ -160,7 +160,7 @@ namespace Chordial.Kademlia
 
                 closestPeerNotAsked.Value.Asked = true;
                 var remotePeerUri = closestPeerNotAsked.Value.Contact.ToUri();
-                var peer = kernel.Get<IKadmeliaServer>(remotePeerUri.Scheme, new Parameter("uri", remotePeerUri, false));
+                var peer = serverFactory(remotePeerUri);
 
                 SearchResult searchResult;
                 if (getValue)
@@ -192,7 +192,7 @@ namespace Chordial.Kademlia
                             shortlist.Add(distance, new HaveAsked() { Contact = suggestion });
 
                         //Add this guy to our contact cache
-                        routingTable.AddContact(suggestion, myself, kernel);
+                        routingTable.AddContact(suggestion);
                     }
                 }
             }

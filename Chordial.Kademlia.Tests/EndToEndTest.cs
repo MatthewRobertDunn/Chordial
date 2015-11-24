@@ -36,27 +36,28 @@ namespace Chordial.Kademlia.Tests
 
 
             //create our first peer
-            List<IKadmeliaPeer> peers = new List<IKadmeliaPeer>();
+            var peers = new Dictionary<string, IKadmeliaPeer>();
 
-            kernel.Bind<IKadmeliaServer>()
+            kernel.Bind<Func<Uri, IKadmeliaServer>>()
                 .ToMethod
-                (k =>
+                ((c) =>
                     {
-                        var uri = (Uri)k.Parameters.First().GetValue(k, k.Request.Target);
-                        var index = int.Parse(uri.Host);
-                        return peers[index].Server;
+                        return (uri) =>
+                       {
+                           return peers[uri.ToString()].Server;
+                       };
                     }
-                ).Named("mem");
+                );
 
 
 
             var peer = kernel.Get<IKadmeliaPeer>(new ConstructorArgument("myServerUri", new Uri("mem://0")));
-            peers.Add(peer);
+            peers[peer.Myself.Uri] = peer;
             var rand = new Random();
             for (int i = 1; i < 1000; i++)
             {
                 peer = kernel.Get<IKadmeliaPeer>(new ConstructorArgument("myServerUri", new Uri($"mem://{i}")));
-                peers.Add(peer);
+                peers[peer.Myself.Uri] = peer;
                 peer.Client.Booststrap(new[] { "mem://0" });
             }
 
@@ -68,7 +69,7 @@ namespace Chordial.Kademlia.Tests
 
             //pick a random peer and try to get the data back
 
-            peer = peers[rand.Next(peers.Count)];
+            peer = peers.Values.Skip(rand.Next(peers.Count)).First();
 
             var result = peer.Client.Get(key);
 
@@ -76,7 +77,7 @@ namespace Chordial.Kademlia.Tests
             Assert.IsTrue(result.NumberIterations <= 3);
 
             Assert.IsTrue(result.Values[0] == "You suck dicks");
-            var closePeers = peers.Where(x => x.Myself.NodeId[0] == 255).ToList();
+            var closePeers = peers.Values.Where(x => x.Myself.NodeId[0] == 255).ToList();
         }
     }
 }

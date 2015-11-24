@@ -21,11 +21,14 @@ namespace Chordial.Kademlia
         private List<DateTime> accessTimes; // last bucket write or explicit touch
         private ID ourID;
         private Contact myself;
+
+        private Func<Uri, IKadmeliaServer> serverFactory;
+
         /// <summary>
         /// Make a new bucket list, for holding node contacts.
         /// </summary>
         /// <param name="ourID">The ID to center the list on.</param>
-        public BucketList(Contact ourID)
+        public BucketList(Contact ourID, Func<Uri, IKadmeliaServer> serverFactory)
         {
             this.ourID = ourID.GetID();
             this.myself = ourID;
@@ -38,6 +41,7 @@ namespace Chordial.Kademlia
                 buckets.Add(new List<Contact>(BUCKET_SIZE));
                 accessTimes.Add(default(DateTime));
             }
+            this.serverFactory = serverFactory;
         }
 
         private ID OurId
@@ -177,7 +181,7 @@ namespace Chordial.Kademlia
             }
         }
 
-        
+
         [MethodImpl(MethodImplOptions.Synchronized)]
         public IList<Contact> CloseContacts(ID target)
         {
@@ -193,6 +197,53 @@ namespace Chordial.Kademlia
             }
         }
 
+        [MethodImpl(MethodImplOptions.Synchronized)]
+        public void AddContact(Contact applicant)
+        {
+            //Never add myself
+            if (applicant.GetID() == myself.GetID())
+                return;
+            // If we already know about them
+            if (Contains(applicant.GetID()))
+            {
+                // If they have a new address, record that
+                if (Get(applicant.GetID()).Uri
+                   != applicant.Uri)
+                {
+                    // Replace old one
+                    Remove(applicant.GetID());
+                    Put(applicant);
+                }
+                else
+                { // Just promote them
+                    Promote(applicant.GetID());
+                }
+                return;
+            }
+
+            // If we can fit them, do so
+            Contact blocker = Blocker(applicant.GetID());
+            if (blocker == null)
+            {
+                Put(applicant);
+                return;
+            }
+
+            //has the blocker been pinged recently?
+
+
+            // We can't fit them. We have to choose between blocker and applicant
+            var remotePeerUri = blocker.ToUri();
+            var peer = serverFactory(remotePeerUri);
+
+            // If the blocker doesn't respond, pick the applicant.
+            var pingResult = peer.Ping(myself);
+            if (pingResult == null)
+            {
+                Remove(blocker.GetID());
+                Put(applicant);
+            }
+        }
 
         /// <summary>
         /// Returns what bucket an ID maps to.
@@ -229,6 +280,7 @@ namespace Chordial.Kademlia
             }
             return toReturn;
         }
+
 
 
     }

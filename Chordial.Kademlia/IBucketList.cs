@@ -14,5 +14,6 @@ namespace Chordial.Kademlia
         void Put(Contact toAdd);
         void Remove(ID toRemove);
         void Touch(ID key);
+        void AddContact(Contact applicant);
     }
 }

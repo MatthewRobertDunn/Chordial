@@ -17,11 +17,11 @@ namespace Chordial.Kademlia
         private readonly IBucketList routingTable;
         private readonly IStorage _storage;
         private TimeSpan _allowedClockSkew = new TimeSpan(0, 30, 0);
-        private IKernel kernel;
+        private Func<Uri, IKadmeliaServer> serverFactory;
         private Contact myself;
-        public KademliaServer(IBucketList cache, IStorage storage, IKernel kernel)
+        public KademliaServer(IBucketList cache, IStorage storage, Func<Uri, IKadmeliaServer> serverFactory)
         {
-            this.kernel = kernel;
+            this.serverFactory = this.serverFactory;
             this.routingTable = cache;
             this._storage = storage;
             this.myself = cache.OurContact;
@@ -29,14 +29,14 @@ namespace Chordial.Kademlia
 
         public SearchResult FindNode(Contact senderId, byte[] key)
         {
-            routingTable.AddContact(senderId, myself, kernel);
+            routingTable.AddContact(senderId);
             var result = routingTable.CloseContacts(new ID(key), new ID(senderId.NodeId));
             return new SearchResult() { Contacts = result.ToArray() };
         }
 
         public SearchResult FindValue(Contact senderId, byte[] key)
         {
-            routingTable.AddContact(senderId, myself, kernel);
+            routingTable.AddContact(senderId);
             var storageItems = _storage.GetItems(key);
             if (storageItems != null)
                 return new SearchResult() { Values = storageItems.Select(x => x.Value).ToArray() };
@@ -80,7 +80,7 @@ namespace Chordial.Kademlia
         public byte[] Ping(Contact senderId)
         {
             Log("I was pinged!");
-            routingTable.AddContact(senderId, myself, kernel);
+            routingTable.AddContact(senderId);
             return this.myself.NodeId;
         }
 

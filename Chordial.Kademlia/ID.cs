@@ -225,7 +225,7 @@ namespace Chordial.Kademlia
             }
 
             // We might be the first
-            string assembly = Assembly.GetEntryAssembly().GetName().Name;
+            string assembly = Assembly.GetEntryAssembly()?.GetName()?.Name ?? "unit test";
             string libname = Assembly.GetExecutingAssembly().GetName().Name;
             string mutexName = libname + "-" + assembly + "-ID";
             try
@@ -244,7 +244,6 @@ namespace Chordial.Kademlia
             }
 
             // Still the first! Calculate hashed ID.
-            string app = System.Reflection.Assembly.GetEntryAssembly().GetName().FullName;
             string user = Environment.UserName;
             string machine = Environment.MachineName + " " + Environment.OSVersion.VersionString;
 
@@ -254,7 +253,7 @@ namespace Chordial.Kademlia
             {
                 macs += i.GetPhysicalAddress().ToString() + "\n";
             }
-            return ID.Hash(app + user + machine + macs);
+            return ID.Hash(assembly + user + machine + macs);
         }
 
         /// <summary>
