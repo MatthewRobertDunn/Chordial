@@ -48,7 +48,7 @@ namespace Chordial.Kademlia.Tests
                        };
                     }
                 );
-
+             
 
 
             var peer = kernel.Get<IKadmeliaPeer>(new ConstructorArgument("myServerUri", new Uri("mem://0")));
