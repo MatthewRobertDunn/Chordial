@@ -38,8 +38,13 @@ namespace Chordial
         /// <param name="published"></param>
         /// <param name="expires"></param>
         [OperationContract]
-        bool? StoreValue(Contact senderId, byte[] key, string data, DateTime published, DateTime expires);
+        bool StoreValue(Contact senderId, byte[] key, string data, DateTime published, DateTime expires);
 
+        /// <summary>
+        /// Checks if a given peer is alive.
+        /// </summary>
+        /// <param name="senderId"></param>
+        /// <returns></returns>
         [OperationContract]
         byte[] Ping(Contact senderId);
 

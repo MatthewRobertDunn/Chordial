@@ -52,12 +52,12 @@ namespace Chordial.Kademlia.Tests
 
 
             var peer = kernel.Get<IKadmeliaPeer>(new ConstructorArgument("myServerUri", new Uri("mem://0")));
-            peers[peer.Myself.Uri] = peer;
+            peers[peer.Myself.Uri.ToString()] = peer;
             var rand = new Random();
             for (int i = 1; i < 1000; i++)
             {
                 peer = kernel.Get<IKadmeliaPeer>(new ConstructorArgument("myServerUri", new Uri($"mem://{i}")));
-                peers[peer.Myself.Uri] = peer;
+                peers[peer.Myself.Uri.ToString()] = peer;
                 peer.Client.Booststrap(new[] { "mem://0" });
             }
 
@@ -77,7 +77,7 @@ namespace Chordial.Kademlia.Tests
             Assert.IsTrue(result.NumberIterations <= 3);
 
             Assert.IsTrue(result.Values[0] == "You suck dicks");
-            var closePeers = peers.Values.Where(x => x.Myself.NodeId[0] == 255).ToList();
+            var closePeers = peers.Values.Where(x => x.Myself.Id.Data[0] == 255).ToList();
         }
     }
 }

@@ -25,7 +25,7 @@ namespace Chordial.Kademlia
         private IStorage dataStore;
 
         //Whoami
-        private Contact myself;
+        private NetworkContact myself;
 
         /// <summary>
         /// Make a node on a specific port, with a specified ID
@@ -36,7 +36,7 @@ namespace Chordial.Kademlia
             this.routingTable = cache;
             this.dataStore = dataStore;
             this.serverFactory = serverFactory;
-            myself = cache.OurContact;
+            myself = cache.MySelf;
         }
 
         /// <summary>
@@ -54,21 +54,21 @@ namespace Chordial.Kademlia
                 var bootstrapPeer = serverFactory(remotePeerUri);
 
                 //Get the remote peers ID, pass it my own contact details
-                var remotePeerID = bootstrapPeer.Ping(myself);
+                var remotePeerID = bootstrapPeer.Ping(myself.ToContact());
                 //Add this peer to my routing table if alive
                 if (remotePeerID != null)
-                    routingTable.AddContact(new Contact() { NodeId = remotePeerID, Uri = uri });
+                    routingTable.AddContact(NetworkContact.Parse(remotePeerID, uri));
             }
 
             //Perform an iterative search for myself, this will populate my routing table further
-            IterativeFindNode(myself.GetID());
+            IterativeFindNode(myself.Id);
             return true;
         }
 
 
         public IterativeFindResult Put(byte[] key, string data, TimeSpan expires, int replicationFactor)
         {
-            return IterativeStore(new ID(key), data, DateTime.UtcNow, DateTime.UtcNow + expires, replicationFactor);
+            return IterativeStore(new KadId(key), data, DateTime.UtcNow, DateTime.UtcNow + expires, replicationFactor);
         }
 
         public IterativeFindResult Get(byte[] key)
@@ -80,10 +80,10 @@ namespace Chordial.Kademlia
                 {
 
                     Values = localStore.Select(x => x.Value).ToList(),
-                    TargetPeer = this.routingTable.OurContact,
+                    TargetPeer = this.routingTable.MySelf,
                 };
 
-            var result = IterativeFind(new ID(key), true);
+            var result = IterativeFind(new KadId(key), true);
             return result;
         }
 
@@ -93,15 +93,14 @@ namespace Chordial.Kademlia
         /// </summary>
         /// <param name="key"></param>
         /// <param name="val"></param>
-        private IterativeFindResult IterativeStore(ID key, string val, DateTime originalInsertion, DateTime expires, int replicationFactor)
+        private IterativeFindResult IterativeStore(KadId key, string val, DateTime originalInsertion, DateTime expires, int replicationFactor)
         {
             // Find the K closest nodes to the key
             var closest = IterativeFindNode(key);
-            foreach (Contact c in closest.ClosestPeers.Take(replicationFactor))
+            foreach (NetworkContact c in closest.ClosestPeers.Take(replicationFactor))
             {
-                var remotePeerUri = c.ToUri();
-                var peer = serverFactory(remotePeerUri);
-                peer.StoreValue(myself, key.Data, val, originalInsertion, expires);
+                var peer = serverFactory(c.Uri);
+                peer.StoreValue(myself.ToContact(), key.Data, val, originalInsertion, expires);
             }
 
             return closest;
@@ -113,7 +112,7 @@ namespace Chordial.Kademlia
         /// </summary>
         /// <param name="target"></param>
         /// <returns></returns>
-        private IterativeFindResult IterativeFindNode(ID target)
+        private IterativeFindResult IterativeFindNode(KadId target)
         {
             return IterativeFind(target, false);
         }
@@ -127,25 +126,25 @@ namespace Chordial.Kademlia
         /// <param name="getValue">true for FindValue, false for FindNode</param>
         /// <param name="vals"></param>
         /// <returns></returns>
-        private IterativeFindResult IterativeFind(ID target, bool getValue)
+        private IterativeFindResult IterativeFind(KadId target, bool getValue)
         {
             IterativeFindResult result = new IterativeFindResult();
 
             // Log the lookup
-            if (target != routingTable.OurContact.GetID())
+            if (target != routingTable.MySelf.Id)
                 routingTable.Touch(target);
 
             // Get the alpha closest nodes to the target
-            var shortlist = new SortedList<ID, HaveAsked>();
+            var shortlist = new SortedList<KadId, HaveAsked>();
 
-            foreach (Contact c in routingTable.CloseContacts(20, target))
-                shortlist.Add(c.GetID() ^ target, new HaveAsked() { Contact = c, Asked = false });
+            foreach (NetworkContact c in routingTable.CloseContacts(20, target))
+                shortlist.Add(c.Id ^ target, new HaveAsked() { Contact = c, Asked = false });
 
             // Until we run out of people to ask or we're done...
             bool peersLeftToAsk = true;
             while (peersLeftToAsk)
             {
-                var closestPeerNotAsked = shortlist.Where(x => x.Value.Contact.GetID() != myself.GetID() && !x.Value.IsNotContactable)  //Don't ask myself, ignore not contactable nodes
+                var closestPeerNotAsked = shortlist.Where(x => x.Value.Contact.Id != myself.Id && !x.Value.IsNotContactable)  //Don't ask myself, ignore not contactable nodes
                                                         .Take(3)    //only consider the first 3 closest nodes
                                                         .Where(x => x.Value.Asked == false) //That we haven't asked before
                                                         .FirstOrDefault(); //Get the first
@@ -159,14 +158,14 @@ namespace Chordial.Kademlia
 
 
                 closestPeerNotAsked.Value.Asked = true;
-                var remotePeerUri = closestPeerNotAsked.Value.Contact.ToUri();
+                var remotePeerUri = closestPeerNotAsked.Value.Contact.Uri;
                 var peer = serverFactory(remotePeerUri);
 
                 SearchResult searchResult;
                 if (getValue)
-                    searchResult = peer.FindValue(myself, target.Data);
+                    searchResult = peer.FindValue(myself.ToContact(), target.Data);
                 else
-                    searchResult = peer.FindNode(myself, target.Data);
+                    searchResult = peer.FindNode(myself.ToContact(), target.Data);
 
                 //peer is down, ignore
                 if (searchResult == null)
@@ -185,9 +184,9 @@ namespace Chordial.Kademlia
                 if (searchResult.Contacts != null)
                 {
                     // Add suggestions to shortlist and check for closest
-                    foreach (Contact suggestion in searchResult.Contacts)
+                    foreach (NetworkContact suggestion in searchResult.Contacts.Select(x=>new NetworkContact(x)))
                     {
-                        var distance = suggestion.GetID() ^ target;
+                        var distance = suggestion.Id ^ target;
                         if (!shortlist.ContainsKey(distance))
                             shortlist.Add(distance, new HaveAsked() { Contact = suggestion });
 

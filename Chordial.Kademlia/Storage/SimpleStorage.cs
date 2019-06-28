@@ -21,7 +21,7 @@ namespace Chordial.Kademlia.Storage
         }
 
         [MethodImpl(MethodImplOptions.Synchronized)]
-        public void PutItem(StorageItem item)
+        public bool PutItem(StorageItem item)
         {
             var stringKey = BitConverter.ToString(item.Key);
 
@@ -35,6 +35,8 @@ namespace Chordial.Kademlia.Storage
             }
 
             result.Add(item);
+
+            return true;
         }
     }
 

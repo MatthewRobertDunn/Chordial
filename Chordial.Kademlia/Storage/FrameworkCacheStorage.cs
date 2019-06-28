@@ -21,7 +21,6 @@ namespace Chordial.Kademlia.Storage
                 lock (storage)
                 {
                     var now = DateTime.UtcNow;
-
                     storage.RemoveAll(x => now > x.Expires);
                     //Get max expires
                     if (storage.Count > 0)
@@ -42,7 +41,7 @@ namespace Chordial.Kademlia.Storage
         }
 
         [MethodImpl(MethodImplOptions.Synchronized)]
-        public void PutItem(StorageItem item)
+        public bool PutItem(StorageItem item)
         {
             var stringKey = BitConverter.ToString(item.Key);
             var storage = new List<StorageItem>();
@@ -56,6 +55,8 @@ namespace Chordial.Kademlia.Storage
                     cache.Add(stringKey, storage, maxExpires);
                 }
             }
+
+            return true;
         }
     }
 }

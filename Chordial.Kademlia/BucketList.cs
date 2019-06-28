@@ -15,44 +15,33 @@ namespace Chordial.Kademlia
     public class BucketList : IBucketList
     {
         private const int BUCKET_SIZE = 20; // "K" in the spec
-        private const int NUM_BUCKETS = 8 * ID.ID_LENGTH; // One per bit in an ID
+        private const int NUM_BUCKETS = 8 * KadId.ID_LENGTH; // One per bit in an ID
 
-        private List<List<Contact>> buckets;
-        private List<DateTime> accessTimes; // last bucket write or explicit touch
-        private ID ourID;
-        private Contact myself;
-
+        private readonly List<List<NetworkContact>> buckets;
+        private readonly List<DateTime> accessTimes; // last bucket write or explicit touch
         private Func<Uri, IKadmeliaServer> serverFactory;
+        public NetworkContact MySelf { get; }
 
         /// <summary>
         /// Make a new bucket list, for holding node contacts.
         /// </summary>
-        /// <param name="ourID">The ID to center the list on.</param>
-        public BucketList(Contact ourID, Func<Uri, IKadmeliaServer> serverFactory)
+        /// <param name="mySelf">The ID to center the list on.</param>
+        public BucketList(NetworkContact mySelf, Func<Uri, IKadmeliaServer> serverFactory)
         {
-            this.ourID = ourID.GetID();
-            this.myself = ourID;
-            buckets = new List<List<Contact>>(NUM_BUCKETS);
+            this.MySelf = mySelf;
+            buckets = new List<List<NetworkContact>>(NUM_BUCKETS);
             accessTimes = new List<DateTime>();
 
             // Set up each bucket
             for (int i = 0; i < NUM_BUCKETS; i++)
             {
-                buckets.Add(new List<Contact>(BUCKET_SIZE));
+                buckets.Add(new List<NetworkContact>(BUCKET_SIZE));
                 accessTimes.Add(default(DateTime));
             }
             this.serverFactory = serverFactory;
         }
 
-        private ID OurId
-        {
-            get { return ourID; }
-        }
 
-        public Contact OurContact
-        {
-            get { return this.myself; }
-        }
 
         /// <summary>
         /// Returns what contact is blocking insertion (least promoted), or null if no contact is.
@@ -60,7 +49,7 @@ namespace Chordial.Kademlia
         /// <param name="toAdd"></param>
         /// <returns></returns>
         [MethodImpl(MethodImplOptions.Synchronized)]
-        public Contact Blocker(ID toAdd)
+        public NetworkContact Blocker(KadId toAdd)
         {
             int bucket = BucketFor(toAdd);
             if (buckets[bucket].Count < BUCKET_SIZE)
@@ -79,7 +68,7 @@ namespace Chordial.Kademlia
         /// <param name="toCheck"></param>
         /// <returns></returns>
         [MethodImpl(MethodImplOptions.Synchronized)]
-        public bool Contains(ID toCheck)
+        public bool Contains(KadId toCheck)
         {
             return this.Get(toCheck) != null;
         }
@@ -90,14 +79,14 @@ namespace Chordial.Kademlia
         /// </summary>
         /// <param name="toAdd"></param>
         [MethodImpl(MethodImplOptions.Synchronized)]
-        public void Put(Contact toAdd)
+        public void Put(NetworkContact toAdd)
         {
             if (toAdd == null)
             {
                 return; // Don't be silly.
             }
 
-            int bucket = BucketFor(toAdd.GetID());
+            int bucket = BucketFor(toAdd.Id);
             buckets[bucket].Add(toAdd); // No lock: people can read while we do this.
             accessTimes[bucket] = DateTime.Now;
         }
@@ -108,7 +97,7 @@ namespace Chordial.Kademlia
         /// </summary>
         /// <param name="key"></param>
         [MethodImpl(MethodImplOptions.Synchronized)]
-        public void Touch(ID key)
+        public void Touch(KadId key)
         {
             accessTimes[BucketFor(key)] = DateTime.Now;
         }
@@ -119,12 +108,12 @@ namespace Chordial.Kademlia
         /// <param name="toGet"></param>
         /// <returns></returns>
         [MethodImpl(MethodImplOptions.Synchronized)]
-        public Contact Get(ID toGet)
+        public NetworkContact Get(KadId toGet)
         {
             int bucket = BucketFor(toGet);
             for (int i = 0; i < buckets[bucket].Count; i++)
             {
-                if (buckets[bucket][i].GetID() == toGet)
+                if (buckets[bucket][i].Id == toGet)
                 {
                     return buckets[bucket][i];
                 }
@@ -154,9 +143,9 @@ namespace Chordial.Kademlia
         /// </summary>
         /// <param name="toPromote"></param>
         [MethodImpl(MethodImplOptions.Synchronized)]
-        public void Promote(ID toPromote)
+        public void Promote(KadId toPromote)
         {
-            Contact promotee = Get(toPromote);
+            NetworkContact promotee = Get(toPromote);
             int bucket = BucketFor(toPromote);
             buckets[bucket].Remove(promotee); // Take out
             buckets[bucket].Add(promotee); // And put in at end
@@ -168,12 +157,12 @@ namespace Chordial.Kademlia
         /// </summary>
         /// <param name="toRemove"></param>
         [MethodImpl(MethodImplOptions.Synchronized)]
-        public void Remove(ID toRemove)
+        public void Remove(KadId toRemove)
         {
             int bucket = BucketFor(toRemove);
             for (int i = 0; i < buckets[bucket].Count; i++)
             {
-                if (buckets[bucket][i].GetID() == toRemove)
+                if (buckets[bucket][i].Id == toRemove)
                 {
                     buckets[bucket].RemoveAt(i);
                     return;
@@ -183,46 +172,46 @@ namespace Chordial.Kademlia
 
 
         [MethodImpl(MethodImplOptions.Synchronized)]
-        public IList<Contact> CloseContacts(ID target)
+        public IList<NetworkContact> CloseContacts(KadId target)
         {
-            return AllContacts.OrderBy(x => x.GetID() ^ target)
+            return AllContacts.OrderBy(x => x.Id ^ target)
                               .ToList();
         }
 
-        private IEnumerable<Contact> AllContacts
+        private IEnumerable<NetworkContact> AllContacts
         {
             get
             {
-                return buckets.SelectMany(x => x).Concat(new[] { this.myself });
+                return buckets.SelectMany(x => x).Concat(new[] { this.MySelf });
             }
         }
 
         [MethodImpl(MethodImplOptions.Synchronized)]
-        public void AddContact(Contact applicant)
+        public void AddContact(NetworkContact applicant)
         {
             //Never add myself
-            if (applicant.GetID() == myself.GetID())
+            if (applicant.Id == MySelf.Id)
                 return;
             // If we already know about them
-            if (Contains(applicant.GetID()))
+            if (Contains(applicant.Id))
             {
                 // If they have a new address, record that
-                if (Get(applicant.GetID()).Uri
+                if (Get(applicant.Id).Uri
                    != applicant.Uri)
                 {
                     // Replace old one
-                    Remove(applicant.GetID());
+                    Remove(applicant.Id);
                     Put(applicant);
                 }
                 else
                 { // Just promote them
-                    Promote(applicant.GetID());
+                    Promote(applicant.Id);
                 }
                 return;
             }
 
             // If we can fit them, do so
-            Contact blocker = Blocker(applicant.GetID());
+            NetworkContact blocker = Blocker(applicant.Id);
             if (blocker == null)
             {
                 Put(applicant);
@@ -231,16 +220,14 @@ namespace Chordial.Kademlia
 
             //has the blocker been pinged recently?
 
-
             // We can't fit them. We have to choose between blocker and applicant
-            var remotePeerUri = blocker.ToUri();
-            var peer = serverFactory(remotePeerUri);
+            var peer = serverFactory(blocker.Uri);
 
             // If the blocker doesn't respond, pick the applicant.
-            var pingResult = peer.Ping(myself);
+            var pingResult = peer.Ping(MySelf.ToContact());
             if (pingResult == null)
             {
-                Remove(blocker.GetID());
+                Remove(blocker.Id);
                 Put(applicant);
             }
         }
@@ -251,9 +238,9 @@ namespace Chordial.Kademlia
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        private int BucketFor(ID id)
+        private int BucketFor(KadId id)
         {
-            return (OurId.DifferingBit(id));
+            return (this.MySelf.Id.DifferingBit(id));
         }
 
         /// <summary>
@@ -265,16 +252,16 @@ namespace Chordial.Kademlia
             string toReturn = "BucketList:";
             for (int i = 0; i < NUM_BUCKETS; i++)
             {
-                List<Contact> bucket = buckets[i];
+                List<NetworkContact> bucket = buckets[i];
                 lock (bucket)
                 {
                     if (bucket.Count > 0)
                     {
                         toReturn += "\nBucket " + i.ToString() + ":";
                     }
-                    foreach (Contact c in bucket)
+                    foreach (NetworkContact c in bucket)
                     {
-                        toReturn += "\n" + c.GetID().ToString() + "@" + c.Uri.ToString();
+                        toReturn += "\n" + c.Id.ToString() + "@" + c.Uri.ToString();
                     }
                 }
             }

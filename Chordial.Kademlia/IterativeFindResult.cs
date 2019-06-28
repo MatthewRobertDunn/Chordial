@@ -10,7 +10,7 @@ namespace Chordial.Kademlia
     {
         public IList<string> Values { get; set; }
         public int NumberIterations { get; set; }
-        public Contact TargetPeer { get; set; }
-        public List<Contact> ClosestPeers { get; set; }
+        public NetworkContact TargetPeer { get; set; }
+        public List<NetworkContact> ClosestPeers { get; set; }
     }
 }

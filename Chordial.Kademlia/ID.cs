@@ -15,7 +15,7 @@ namespace Chordial.Kademlia
     /// The number is stored big-endian (most-significant-byte first).
     /// IDs are immutable.
     /// </summary>
-    public class ID : IComparable
+    public class KadId : IComparable
     {
         public const int ID_LENGTH = 20; // This is how long IDs should be, in bytes.
         private byte[] data;
@@ -31,7 +31,7 @@ namespace Chordial.Kademlia
         /// Make a new ID from a byte array.
         /// </summary>
         /// <param name="data">An array of exactly 20 bytes.</param>
-        public ID(byte[] data)
+        public KadId(byte[] data)
         {
             if (data.Length == ID_LENGTH)
             {
@@ -53,10 +53,10 @@ namespace Chordial.Kademlia
         /// </summary>
         /// <param name="key"></param>
         /// <returns></returns>
-        public static ID Hash(string key)
+        public static KadId Hash(string key)
         {
             HashAlgorithm hasher = new SHA1Managed(); // Keeping this around results in exceptions
-            return new ID(hasher.ComputeHash(Encoding.UTF8.GetBytes(key)));
+            return new KadId(hasher.ComputeHash(Encoding.UTF8.GetBytes(key)));
         }
 
         /// <summary>
@@ -66,7 +66,7 @@ namespace Chordial.Kademlia
         /// <param name="a"></param>
         /// <param name="b"></param>
         /// <returns></returns>
-        public static ID operator ^(ID a, ID b)
+        public static KadId operator ^(KadId a, KadId b)
         {
             byte[] xoredData = new byte[ID_LENGTH];
             // Do each byte in turn
@@ -74,11 +74,11 @@ namespace Chordial.Kademlia
             {
                 xoredData[i] = (byte)(a.Data[i] ^ b.Data[i]);
             }
-            return new ID(xoredData);
+            return new KadId(xoredData);
         }
 
         // We need to compare these when measuring distance
-        public static bool operator <(ID a, ID b)
+        public static bool operator <(KadId a, KadId b)
         {
             for (int i = 0; i < ID_LENGTH; i++)
             {
@@ -94,7 +94,7 @@ namespace Chordial.Kademlia
             return false; // No mismatches
         }
 
-        public static bool operator >(ID a, ID b)
+        public static bool operator >(KadId a, KadId b)
         {
             for (int i = 0; i < ID_LENGTH; i++)
             {
@@ -111,7 +111,7 @@ namespace Chordial.Kademlia
         }
 
         // We're a value, so we override all these
-        public static bool operator ==(ID a, ID b)
+        public static bool operator ==(KadId a, KadId b)
         {
             // Handle null
             if (ValueType.ReferenceEquals(a, null))
@@ -134,7 +134,7 @@ namespace Chordial.Kademlia
             return true; // Must match
         }
 
-        public static bool operator !=(ID a, ID b)
+        public static bool operator !=(KadId a, KadId b)
         {
             return !(a == b); // Already have that
         }
@@ -156,9 +156,9 @@ namespace Chordial.Kademlia
 
         public override bool Equals(object obj)
         {
-            if (obj is ID)
+            if (obj is KadId)
             {
-                return this == (ID)obj;
+                return this == (KadId)obj;
             }
             else
             {
@@ -172,9 +172,9 @@ namespace Chordial.Kademlia
         /// </summary>
         /// <param name="other"></param>
         /// <returns></returns>
-        public int DifferingBit(ID other)
+        public int DifferingBit(KadId other)
         {
-            ID differingBits = this ^ other;
+            KadId differingBits = this ^ other;
             int differAt = 0;
 
 
@@ -202,11 +202,11 @@ namespace Chordial.Kademlia
         /// TODO: Make into a constructor?
         /// </summary>
         /// <returns></returns>
-        public static ID RandomID()
+        public static KadId RandomID()
         {
             byte[] data = new byte[ID_LENGTH];
             rnd.NextBytes(data);
-            return new ID(data);
+            return new KadId(data);
         }
 
         /// <summary>
@@ -215,7 +215,7 @@ namespace Chordial.Kademlia
         /// If that ID is taken, returns a random ID.
         /// </summary>
         /// <returns></returns>
-        public static ID HostID()
+        public static KadId HostID()
         {
             // If we already have a mutex handle, we're not the first.
             if (mutex != null)
@@ -253,7 +253,7 @@ namespace Chordial.Kademlia
             {
                 macs += i.GetPhysicalAddress().ToString() + "\n";
             }
-            return ID.Hash(assembly + user + machine + macs);
+            return KadId.Hash(assembly + user + machine + macs);
         }
 
         /// <summary>
@@ -281,14 +281,14 @@ namespace Chordial.Kademlia
         /// <returns></returns>
         public int CompareTo(object obj)
         {
-            if (obj is ID)
+            if (obj is KadId)
             {
                 // Compare as ID.
-                if (this < (ID)obj)
+                if (this < (KadId)obj)
                 {
                     return -1;
                 }
-                else if (this == (ID)obj)
+                else if (this == (KadId)obj)
                 {
                     return 0;
                 }

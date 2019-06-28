@@ -11,22 +11,19 @@ namespace Chordial.Kademlia
     public static class BucketListExtentions
     {
 
-        public static List<Contact> CloseContacts(this IBucketList _contactCache, int count, ID target)
+        public static List<NetworkContact> CloseContacts(this IBucketList _contactCache, int count, KadId target)
         {
             return _contactCache.CloseContacts(target)
                     .Take(count).ToList();
         }
 
-
-        public static List<Contact> CloseContacts(this IBucketList _contactCache, ID target, ID excluded)
+        public static List<NetworkContact> CloseContacts(this IBucketList _contactCache, KadId target, KadId excluded)
         {
             return _contactCache.CloseContacts(target)
-                    .Take(8 * ID.ID_LENGTH)
-                    .Where(x => x.GetID() != excluded)
+                    .Take(8 * KadId.ID_LENGTH)
+                    .Where(x => x.Id != excluded)
                     .ToList();
         }
-
-               
 
         public static void Log(string message)
         {

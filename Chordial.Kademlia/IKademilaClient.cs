@@ -21,17 +21,18 @@ namespace Chordial.Kademlia
         void StartServer(Uri myServerUri);
         IKademilaClient Client { get; }
         IKadmeliaServer Server { get; }
-        Contact Myself { get; }
+        NetworkContact Myself { get; }
     }
 
     public class KadmeliaPeer : IKadmeliaPeer
     {
-        private Contact myself;
+        public NetworkContact Myself { get; }
+
         public KadmeliaPeer(IStorage storage, Uri myServerUri, Func<Uri, IKadmeliaServer> serverFactory)
         {
-            var id = ID.HostID();
-            myself = new Contact() { NodeId = id.Data, Uri = myServerUri.ToString() };
-            var cache = new BucketList(myself, serverFactory);
+            var id = KadId.HostID();
+            Myself = new NetworkContact(id, myServerUri);
+            var cache = new BucketList(Myself, serverFactory);
             this.client = new KademliaClient(cache, storage, serverFactory);
             this.server = new KademliaServer(cache, storage);
         }
@@ -54,12 +55,5 @@ namespace Chordial.Kademlia
             get { return server; }
         }
 
-        public Contact Myself
-        {
-            get
-            {
-                return myself;
-            }
-        }
     }
 }

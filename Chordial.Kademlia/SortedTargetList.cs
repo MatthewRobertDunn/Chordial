@@ -10,7 +10,7 @@ namespace Chordial.Kademlia
 
     public class HaveAsked
     {
-        public Contact Contact { get; set; }
+        public NetworkContact Contact { get; set; }
         public bool Asked { get; set; }
         public bool IsNotContactable { get; internal set; }
     }

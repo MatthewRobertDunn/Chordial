@@ -62,6 +62,7 @@
     <Compile Include="KademliaServer.cs" />
     <Compile Include="KadmeliaWcfServerProxy.cs" />
     <Compile Include="Mappingcs.cs" />
+    <Compile Include="NetworkContact.cs" />
     <Compile Include="Network\IpUtils.cs" />
     <Compile Include="PeerFactory.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

@@ -38,7 +38,7 @@ namespace Chordial.Kademlia
             return ExceptionWrap(() => base.Channel.FindValue(senderId, key));
         }
 
-        public bool? StoreValue(Contact senderId, byte[] key, string data, DateTime published, DateTime expires)
+        public bool StoreValue(Contact senderId, byte[] key, string data, DateTime published, DateTime expires)
         {
             return ExceptionWrap(() => (base.Channel.StoreValue(senderId, key, data, published, expires)));
         }

@@ -15,48 +15,46 @@ namespace Chordial.Kademlia
     {
         // Network State
         private readonly IBucketList routingTable;
-        private readonly IStorage _storage;
-        private TimeSpan _allowedClockSkew = new TimeSpan(0, 30, 0);
-        private Contact myself;
-        public KademliaServer(IBucketList cache, IStorage storage)
+        private readonly IStorage storage;
+        private readonly TimeSpan allowedClockSkew = new TimeSpan(0, 30, 0);
+        public KademliaServer(IBucketList routingTable, IStorage storage)
         {
-            this.routingTable = cache;
-            this._storage = storage;
-            this.myself = cache.OurContact;
+            this.routingTable = routingTable;
+            this.storage = storage;
         }
 
         public SearchResult FindNode(Contact senderId, byte[] key)
         {
-            routingTable.AddContact(senderId);
-            var result = routingTable.CloseContacts(new ID(key), new ID(senderId.NodeId));
-            return new SearchResult() { Contacts = result.ToArray() };
+            routingTable.AddContact(NetworkContact.Parse(senderId));
+            var result = routingTable.CloseContacts(new KadId(key), senderId.GetID());
+            return new SearchResult() { Contacts = result.Select(x=>x.ToContact()).ToArray() };
         }
 
         public SearchResult FindValue(Contact senderId, byte[] key)
         {
-            routingTable.AddContact(senderId);
-            var storageItems = _storage.GetItems(key);
+            routingTable.AddContact(NetworkContact.Parse(senderId));
+            var storageItems = storage.GetItems(key);
             if (storageItems != null)
                 return new SearchResult() { Values = storageItems.Select(x => x.Value).ToArray() };
 
             return FindNode(senderId, key);
         }
 
-        public bool? StoreValue(Contact senderId, byte[] key, string data, DateTime published, DateTime expires)
+        public bool StoreValue(Contact senderId, byte[] key, string data, DateTime published, DateTime expires)
         {
-            //If published is older than expires that's silly
+            //Publish date can't be older than expires
             if (published > expires)
                 return false;
 
-            //Published date shouldn't be too far in the past
-            if (published > (DateTime.UtcNow + _allowedClockSkew))
+            //Published date shouldn't be too far in the future
+            if (published > (DateTime.UtcNow + allowedClockSkew))
                 return false;
 
-            //Expire date shouldn't be too far into the future
-            if ((expires - DateTime.UtcNow) > _allowedClockSkew)
+            //Expire date shouldn't be too far into the past
+            if ((expires - DateTime.UtcNow) > allowedClockSkew)
                 return false;
 
-            var hash = ID.Hash(data);
+            var hash = KadId.Hash(data);
 
             var item = new StorageItem()
             {
@@ -68,20 +66,17 @@ namespace Chordial.Kademlia
             };
 
 
-            _storage.PutItem(item);
+            storage.PutItem(item);
 
             return true;
         }
 
-
-
         public byte[] Ping(Contact senderId)
         {
             Log("I was pinged!");
-            routingTable.AddContact(senderId);
-            return this.myself.NodeId;
+            routingTable.AddContact(new NetworkContact(senderId));
+            return this.routingTable.MySelf.Id.Data;
         }
-
 
         /// <summary>
         /// Log debug messages, if debugging is enabled.

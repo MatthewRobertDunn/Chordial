@@ -8,6 +8,6 @@ namespace Chordial.Kademlia
     public interface IStorage
     {
         IEnumerable<StorageItem> GetItems(byte[] key);
-        void PutItem(StorageItem item);
+        bool PutItem(StorageItem item);
     }
 }

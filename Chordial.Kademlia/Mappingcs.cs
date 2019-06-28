@@ -8,9 +8,9 @@ namespace Chordial.Kademlia
 {
     public static class Mappingcs
     {
-        public static ID GetID(this Contact contact)
+        public static KadId GetID(this Contact contact)
         {
-            return new ID(contact.NodeId);
+            return new KadId(contact.NodeId);
         }
 
     }
