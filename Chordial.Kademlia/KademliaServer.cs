@@ -17,11 +17,9 @@ namespace Chordial.Kademlia
         private readonly IBucketList routingTable;
         private readonly IStorage _storage;
         private TimeSpan _allowedClockSkew = new TimeSpan(0, 30, 0);
-        private Func<Uri, IKadmeliaServer> serverFactory;
         private Contact myself;
-        public KademliaServer(IBucketList cache, IStorage storage, Func<Uri, IKadmeliaServer> serverFactory)
+        public KademliaServer(IBucketList cache, IStorage storage)
         {
-            this.serverFactory = this.serverFactory;
             this.routingTable = cache;
             this._storage = storage;
             this.myself = cache.OurContact;

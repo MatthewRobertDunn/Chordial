@@ -26,17 +26,14 @@ namespace Chordial.Kademlia
 
     public class KadmeliaPeer : IKadmeliaPeer
     {
-        private IKernel kernel;
         private Contact myself;
         public KadmeliaPeer(IStorage storage, Uri myServerUri, Func<Uri, IKadmeliaServer> serverFactory)
         {
-            this.kernel = kernel;
-
             var id = ID.HostID();
             myself = new Contact() { NodeId = id.Data, Uri = myServerUri.ToString() };
             var cache = new BucketList(myself, serverFactory);
             this.client = new KademliaClient(cache, storage, serverFactory);
-            this.server = new KademliaServer(cache, storage, serverFactory);
+            this.server = new KademliaServer(cache, storage);
         }
 
 
