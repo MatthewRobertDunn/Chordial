@@ -18,10 +18,26 @@ namespace Chordial.Kademlia
             return Parse(contact.NodeId, contact.Uri);
         }
 
+        public static bool TryParse(Contact contact, out NetworkContact result)
+        {
+            try
+            {
+                result = NetworkContact.Parse(contact);
+                return true;
+            }
+#pragma warning disable CS0168 // Variable is declared but never used
+            catch (Exception ex)
+#pragma warning restore CS0168 // Variable is declared but never used
+            {
+                result = null;
+                return false;
+            }
+        }
+
         public NetworkContact(KadId nodeId, Uri uri)
         {
             this.Id = nodeId;
-            this.Uri = Uri;
+            this.Uri = uri;
         }
         public NetworkContact(Contact contact)
         {
