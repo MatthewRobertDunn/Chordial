@@ -48,8 +48,6 @@ namespace Chordial.Kademlia.Tests
                        };
                     }
                 );
-             
-
 
             var peer = kernel.Get<IKadmeliaPeer>(new ConstructorArgument("myServerUri", new Uri("mem://0")));
             peers[peer.Myself.Uri.ToString()] = peer;
@@ -61,10 +59,9 @@ namespace Chordial.Kademlia.Tests
                 peer.Client.Booststrap(new[] { "mem://0" });
             }
 
+            byte[] key = Enumerable.Repeat<byte>(255, KadId.ID_LENGTH).ToArray();
 
-            byte[] key = new byte[20] { 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255 };
-
-            var putResult = peer.Client.Put(key, "You suck dicks", new TimeSpan(0, 15, 0), 5);
+            var putResult = peer.Client.Put(key, "This is a test key", new TimeSpan(0, 15, 0), 5);
 
 
             //pick a random peer and try to get the data back
@@ -76,7 +73,7 @@ namespace Chordial.Kademlia.Tests
             Assert.IsTrue(result.Values.Count == 1);
             Assert.IsTrue(result.NumberIterations <= 3);
 
-            Assert.IsTrue(result.Values[0] == "You suck dicks");
+            Assert.IsTrue(result.Values[0] == "This is a test key");
             var closePeers = peers.Values.Where(x => x.Myself.Id.Data[0] == 255).ToList();
         }
     }

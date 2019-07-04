@@ -11,13 +11,13 @@ using System.Threading.Tasks;
 namespace Chordial.Kademlia
 {
     /// <summary>
-    /// Represents a 160-bit number which is used both as a nodeID and as a key for the DHT.
+    /// Represents a 256-bit number which is used both as a nodeID and as a key for the DHT.
     /// The number is stored big-endian (most-significant-byte first).
     /// IDs are immutable.
     /// </summary>
     public class KadId : IComparable
     {
-        public const int ID_LENGTH = 20; // This is how long IDs should be, in bytes.
+        public const int ID_LENGTH = 32; // This is how long IDs should be, in bytes.
         private byte[] data;
 
         // We want to be able to generate random IDs without timing issues.
@@ -55,8 +55,10 @@ namespace Chordial.Kademlia
         /// <returns></returns>
         public static KadId Hash(string key)
         {
-            HashAlgorithm hasher = new SHA1Managed(); // Keeping this around results in exceptions
-            return new KadId(hasher.ComputeHash(Encoding.UTF8.GetBytes(key)));
+            using (HashAlgorithm hasher = new SHA256Managed()) // Keeping this around results in exceptions
+            {
+                return new KadId(hasher.ComputeHash(Encoding.UTF8.GetBytes(key)));
+            }
         }
 
         /// <summary>
