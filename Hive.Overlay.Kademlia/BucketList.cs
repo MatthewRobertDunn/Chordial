@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Threading.Tasks;
 
 namespace Hive.Overlay.Kademlia
 {
@@ -218,17 +219,32 @@ namespace Hive.Overlay.Kademlia
             }
 
             //has the blocker been pinged recently?
+            Task.Factory.StartNew<bool>(() => PingBlocker(blocker))
+                .ContinueWith
+                (
+                    x =>
+                    {
+                        // If the blocker doesn't respond, pick the applicant.
+                        if (!x.Result)
+                            ReplaceBlocker(applicant, blocker);
+                    }
+                );
+        }
 
+        [MethodImpl(MethodImplOptions.Synchronized)]
+        private void ReplaceBlocker(NetworkContact applicant, NetworkContact blocker)
+        {
+            Remove(blocker.Id);
+            Put(applicant);
+        }
+
+        private bool PingBlocker(NetworkContact blocker)
+        {
             // We can't fit them. We have to choose between blocker and applicant
-            var peer = serverFactory(blocker.Uri);
-
-            // If the blocker doesn't respond, pick the applicant.
+            var remotePeerUri = blocker.Uri;
+            var peer = serverFactory(remotePeerUri);
             var pingResult = peer.Ping(MySelf.ToContact());
-            if (pingResult == null)
-            {
-                Remove(blocker.Id);
-                Put(applicant);
-            }
+            return pingResult != null;
         }
 
         /// <summary>
