@@ -47,20 +47,15 @@ namespace Hive.Overlay.Kademlia
             if ((expires - DateTime.UtcNow) > allowedClockSkew)
                 return false;
 
-            var hash = KadId.Hash(data);
-
             var item = new StorageItem()
             {
                 Expires = expires,
                 PublicationDate = published,
-                Hash = hash.Data,
                 Key = key,
                 Value = data
             };
 
-
             storage.PutItem(item);
-
             return true;
         }
 
