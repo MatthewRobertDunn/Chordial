@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 14
-VisualStudioVersion = 14.0.23107.0
+# Visual Studio 15
+VisualStudioVersion = 15.0.28307.329
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Chordial", "Chordial\Chordial.csproj", "{6956EAC5-8BD8-401B-8A71-65EF0CD0A73D}"
 EndProject
@@ -10,6 +10,12 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Chordial.Kademlia.Tests", "Chordial.Kademlia.Tests\Chordial.Kademlia.Tests.csproj", "{8DA7FA9C-E740-40E1-AB5A-D65E54F775FA}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Chordial.ConsoleExample", "Chordial.ConsoleExample\Chordial.ConsoleExample.csproj", "{62E85AF3-0038-4B49-A6CB-2302BFD40101}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Hive.Overlay.Api", "Hive.Overlay.Api\Hive.Overlay.Api.csproj", "{BF80962E-D335-4877-8180-BBD8BF65C215}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Hive.Overlay.Kademlia", "Hive.Overlay.Kademlia\Hive.Overlay.Kademlia.csproj", "{17FCE19A-B8FD-4C39-AB64-63405FBB0A0C}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Hive.Overlay.Tests", "Hive.Overlay.Tests\Hive.Overlay.Tests.csproj", "{BF35DE7A-3C67-492D-B0B3-3844DB068DA7}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -33,8 +39,23 @@ Global
 		{62E85AF3-0038-4B49-A6CB-2302BFD40101}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{62E85AF3-0038-4B49-A6CB-2302BFD40101}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{62E85AF3-0038-4B49-A6CB-2302BFD40101}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BF80962E-D335-4877-8180-BBD8BF65C215}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BF80962E-D335-4877-8180-BBD8BF65C215}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BF80962E-D335-4877-8180-BBD8BF65C215}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BF80962E-D335-4877-8180-BBD8BF65C215}.Release|Any CPU.Build.0 = Release|Any CPU
+		{17FCE19A-B8FD-4C39-AB64-63405FBB0A0C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{17FCE19A-B8FD-4C39-AB64-63405FBB0A0C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{17FCE19A-B8FD-4C39-AB64-63405FBB0A0C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{17FCE19A-B8FD-4C39-AB64-63405FBB0A0C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BF35DE7A-3C67-492D-B0B3-3844DB068DA7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BF35DE7A-3C67-492D-B0B3-3844DB068DA7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BF35DE7A-3C67-492D-B0B3-3844DB068DA7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BF35DE7A-3C67-492D-B0B3-3844DB068DA7}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {828925BA-1ED6-4866-AD5F-AF3AE6C89164}
 	EndGlobalSection
 EndGlobal
