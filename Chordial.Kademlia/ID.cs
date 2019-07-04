@@ -55,9 +55,11 @@ namespace Chordial.Kademlia
         /// <returns></returns>
         public static KadId Hash(string key)
         {
-            using (HashAlgorithm hasher = new SHA256Managed()) // Keeping this around results in exceptions
+            //We use truncated SHA512 because it's a fair bit faster, and is resistant to length extention and prem
+            using (HashAlgorithm hasher = new SHA512Managed())
             {
-                return new KadId(hasher.ComputeHash(Encoding.UTF8.GetBytes(key)));
+                var hash = hasher.ComputeHash(Encoding.UTF8.GetBytes(key));
+                return new KadId(hash.Take(32).ToArray());
             }
         }
 
