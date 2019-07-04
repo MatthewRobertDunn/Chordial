@@ -126,10 +126,6 @@ namespace Hive.Overlay.Kademlia
         {
             IterativeFindResult result = new IterativeFindResult();
 
-            // Log the lookup
-            if (target != routingTable.MySelf.Id)
-                routingTable.Touch(target);
-
             // Get the alpha closest nodes to the target
             var shortlist = new SortedList<KadId, HaveAsked>();
 

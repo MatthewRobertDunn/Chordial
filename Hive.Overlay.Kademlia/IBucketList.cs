@@ -13,7 +13,6 @@ namespace Hive.Overlay.Kademlia
         void Promote(KadId toPromote);
         void Put(NetworkContact toAdd);
         void Remove(KadId toRemove);
-        void Touch(KadId key);
         void AddContact(NetworkContact applicant);
     }
 }

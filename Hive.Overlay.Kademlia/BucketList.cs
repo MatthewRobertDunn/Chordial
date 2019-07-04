@@ -18,7 +18,6 @@ namespace Hive.Overlay.Kademlia
         private const int NUM_BUCKETS = 8 * KadId.ID_LENGTH; // One per bit in an ID
 
         private readonly List<List<NetworkContact>> buckets;
-        private readonly List<DateTime> accessTimes; // last bucket write or explicit touch
         private Func<Uri, IKadmeliaServer> serverFactory;
         public NetworkContact MySelf { get; }
 
@@ -30,13 +29,11 @@ namespace Hive.Overlay.Kademlia
         {
             this.MySelf = mySelf;
             buckets = new List<List<NetworkContact>>(NUM_BUCKETS);
-            accessTimes = new List<DateTime>();
 
             // Set up each bucket
             for (int i = 0; i < NUM_BUCKETS; i++)
             {
                 buckets.Add(new List<NetworkContact>(BUCKET_SIZE));
-                accessTimes.Add(default(DateTime));
             }
             this.serverFactory = serverFactory;
         }
@@ -88,18 +85,6 @@ namespace Hive.Overlay.Kademlia
 
             int bucket = BucketFor(toAdd.Id);
             buckets[bucket].Add(toAdd); // No lock: people can read while we do this.
-            accessTimes[bucket] = DateTime.Now;
-        }
-
-        /// <summary>
-        /// Report that a lookup was done for the given key.
-        /// Key must not match our ID.
-        /// </summary>
-        /// <param name="key"></param>
-        [MethodImpl(MethodImplOptions.Synchronized)]
-        public void Touch(KadId key)
-        {
-            accessTimes[BucketFor(key)] = DateTime.Now;
         }
 
         /// <summary>
@@ -149,7 +134,6 @@ namespace Hive.Overlay.Kademlia
             int bucket = BucketFor(toPromote);
             buckets[bucket].Remove(promotee); // Take out
             buckets[bucket].Add(promotee); // And put in at end
-            accessTimes[bucket] = DateTime.Now;
         }
 
         /// <summary>
