@@ -163,6 +163,8 @@ namespace Hive.Overlay.Kademlia
                 if (searchResult == null)
                 {
                     closestPeerNotAsked.Value.IsNotContactable = true;
+                    //If we can't contact this peer, why have them in our routing table?
+                    routingTable.Remove(closestPeerNotAsked.Key);
                     continue;
                 }
 
