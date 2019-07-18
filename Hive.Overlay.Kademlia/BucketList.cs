@@ -225,7 +225,7 @@ namespace Hive.Overlay.Kademlia
         private bool PingBlocker(NetworkContact blocker)
         {
             // We can't fit them. We have to choose between blocker and applicant
-            var remotePeerUri = blocker.Uri;
+            var remotePeerUri = blocker.UriDefault;
             var peer = serverFactory(remotePeerUri);
             var pingResult = peer.Ping(MySelf.ToContact());
             return pingResult != null;

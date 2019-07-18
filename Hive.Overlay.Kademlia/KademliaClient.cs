@@ -53,7 +53,7 @@ namespace Hive.Overlay.Kademlia
                 var remotePeerID = bootstrapPeer.Ping(myself.ToContact());
                 //Add this peer to my routing table if alive
                 if (remotePeerID != null)
-                    routingTable.AddContact(NetworkContact.Parse(remotePeerID, uri));
+                    routingTable.AddContact(NetworkContact.Parse(remotePeerID, new[] { uri }));
             }
 
             //Perform an iterative search for myself, this will populate my routing table further
@@ -95,7 +95,7 @@ namespace Hive.Overlay.Kademlia
             var closest = IterativeFindNode(key);
             foreach (NetworkContact c in closest.ClosestPeers.Take(replicationFactor))
             {
-                var peer = serverFactory(c.Uri);
+                var peer = serverFactory(c.UriDefault);
                 peer.StoreValue(myself.ToContact(), key.Data, val, originalInsertion, expires);
             }
 
@@ -150,7 +150,7 @@ namespace Hive.Overlay.Kademlia
 
 
                 closestPeerNotAsked.Value.Asked = true;
-                var remotePeerUri = closestPeerNotAsked.Value.Contact.Uri;
+                var remotePeerUri = closestPeerNotAsked.Value.Contact.UriDefault;
                 var peer = serverFactory(remotePeerUri);
 
                 SearchResult searchResult;
@@ -178,7 +178,7 @@ namespace Hive.Overlay.Kademlia
                 if (searchResult.Contacts != null)
                 {
                     // Add suggestions to shortlist and check for closest
-                    foreach (NetworkContact suggestion in searchResult.Contacts.Select(x=>new NetworkContact(x)))
+                    foreach (NetworkContact suggestion in searchResult.Contacts.Select(x=>NetworkContact.Parse(x)))
                     {
                         var distance = suggestion.Id ^ target;
                         if (!shortlist.ContainsKey(distance))

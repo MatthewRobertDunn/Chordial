@@ -20,7 +20,7 @@ namespace Hive.Overlay.Kademlia
         {
             routingTable.AddContact(NetworkContact.Parse(senderId));
             var result = routingTable.CloseContacts(new KadId(key), senderId.GetID());
-            return new SearchResult() { Contacts = result.Select(x=>x.ToContact()).ToArray() };
+            return new SearchResult() { Contacts = result.Select(x => x.ToContact()).ToArray() };
         }
 
         public SearchResult FindValue(Contact senderId, byte[] key)
@@ -62,7 +62,7 @@ namespace Hive.Overlay.Kademlia
         public byte[] Ping(Contact senderId)
         {
             Log("I was pinged!");
-            routingTable.AddContact(new NetworkContact(senderId));
+            routingTable.AddContact(NetworkContact.Parse(senderId));
             return this.routingTable.MySelf.Id.Data;
         }
 

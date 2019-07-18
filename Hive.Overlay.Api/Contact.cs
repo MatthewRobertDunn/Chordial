@@ -9,6 +9,6 @@ namespace Hive.Overlay.Api
         public byte[] NodeId { get; set; }
 
         [DataMember]
-        public string Uri { get; set; }
+        public string[] Uri { get; set; }
     }
 }

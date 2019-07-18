@@ -9,9 +9,10 @@ namespace Hive.Overlay.Kademlia
     public class NetworkContact
     {
 
-        public static NetworkContact Parse(byte[] nodeId, string uriString)
+        public static NetworkContact Parse(byte[] nodeId, string[] uriString)
         {
-            return new NetworkContact(new KadId(nodeId), new Uri(uriString));
+            var uris = uriString.Select(x => new Uri(x)).ToList();
+            return new NetworkContact(new KadId(nodeId), uris);
         }
 
         public static NetworkContact Parse(Contact contact)
@@ -35,24 +36,35 @@ namespace Hive.Overlay.Kademlia
             }
         }
 
-        public NetworkContact(KadId nodeId, Uri uri)
+        public NetworkContact(KadId nodeId, IList<Uri> uri)
         {
             this.Id = nodeId;
             this.Uri = uri;
         }
-        public NetworkContact(Contact contact)
-        {
-            this.Id = contact.GetID();
-            this.Uri = new Uri(contact.Uri);
-        }
 
         public KadId Id { get; }
 
-        public Uri Uri { get; }
+        public IList<Uri> Uri { get; }
+
+        /// <summary>
+        /// In the future this will return the preferred URI for contacting an overlay node
+        /// For now we just pick the first on the list
+        /// </summary>
+        public Uri UriDefault
+        {
+            get
+            {
+                return Uri.First();
+            }
+        }
 
         public Contact ToContact()
         {
-            return new Contact() { NodeId = Id.Data, Uri = this.Uri.ToString() };
+            return new Contact()
+            {
+                NodeId = Id.Data,
+                Uri = this.Uri.Select(x => x.ToString()).ToArray()
+            };
         }
     }
 }
