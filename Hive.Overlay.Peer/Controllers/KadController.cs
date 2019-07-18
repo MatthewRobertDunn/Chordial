@@ -1,4 +1,5 @@
 ﻿using Hive.Overlay.Api;
+using Hive.Overlay.Peer.Dto;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
@@ -10,36 +11,17 @@ namespace Hive.Overlay.Peer.Controllers
     [ApiController]
     public class KadController : ControllerBase
     {
-        // GET api/values
-        [HttpGet]
-        public ActionResult<IEnumerable<string>> Get()
-        {
-            return new string[] { "value1", "value2" };
-        }
-
-        // GET api/values/5
-        [HttpGet("/findnode/{key}")]
-        public SearchResult FindNode(byte[] key)
+        /// <summary>
+        /// Hey there cute stuff
+        /// </summary>
+        /// <param name="request"></param>
+        /// <returns></returns>
+        [HttpPost("/findnode/")]
+        public SearchResult FindNode(FindRequest request)
         {
             return new SearchResult();
         }
 
-        // POST api/values
-        [HttpPost]
-        public void Post([FromBody] string value)
-        {
-        }
-
-        // PUT api/values/5
-        [HttpPut("{id}")]
-        public void Put(int id, [FromBody] string value)
-        {
-        }
-
-        // DELETE api/values/5
-        [HttpDelete("{id}")]
-        public void Delete(int id)
-        {
-        }
+        
     }
 }

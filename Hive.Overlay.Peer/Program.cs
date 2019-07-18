@@ -14,6 +14,7 @@ namespace Hive.Overlay.Peer
 
         public static IWebHostBuilder CreateWebHostBuilder(string[] args) =>
             WebHost.CreateDefaultBuilder(args)
+                .UseUrls("http://0.0.0.0:5000")
                 .UseKestrel(options => options.AddServerHeader = false)
                 .UseStartup<Startup>();
     }
