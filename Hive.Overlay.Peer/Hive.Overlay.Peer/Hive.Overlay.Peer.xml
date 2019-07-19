@@ -1,0 +1,45 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Hive.Overlay.Peer</name>
+    </assembly>
+    <members>
+        <member name="M:Hive.Overlay.Peer.Controllers.HiveController.FindNode(Hive.Overlay.Peer.Dto.ClosestNodeSearch)">
+            <summary>
+            Returns a list of nodes closest to the given network address.
+            Set 'address' to the hive address you are searching for.
+            </summary>
+            <param name="request"></param>
+            <returns>A list of nodes closest to the requested address</returns>
+        </member>
+        <member name="M:Hive.Overlay.Peer.Controllers.HiveController.FindNode(System.String)">
+            <summary>
+            Returns a list of nodes closest to the given network address.
+            Set 'address' to the hive address you are searching for.
+            </summary>
+            <param name="request">Base64 encoded string containing the hive address you are searching for</param>
+            <returns>A list of nodes closest to the requested address</returns>
+        </member>
+        <member name="T:Hive.Overlay.Peer.Dto.ClosestNodeSearch">
+            <summary>
+            Request message sent to perform a closest nodes search
+            </summary>
+        </member>
+        <member name="P:Hive.Overlay.Peer.Dto.ClosestNodeSearch.Address">
+            <summary>
+             Find nodes closest to this network address.
+             Key should be a 256bit base64 encoded hive network address
+            </summary>
+        </member>
+        <member name="T:Hive.Overlay.Peer.Dto.HiveRequest">
+            <summary>
+            Base class all hive overly requests inherit from
+            </summary>
+        </member>
+        <member name="P:Hive.Overlay.Peer.Dto.HiveRequest.RequestedBy">
+            <summary>
+            Contact details for the node submitting the request
+            </summary>
+        </member>
+    </members>
+</doc>

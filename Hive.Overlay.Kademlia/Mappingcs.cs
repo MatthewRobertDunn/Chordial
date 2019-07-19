@@ -6,7 +6,7 @@ namespace Hive.Overlay.Kademlia
     {
         public static KadId GetID(this Contact contact)
         {
-            return new KadId(contact.NodeId);
+            return new KadId(contact.Address);
         }
 
     }

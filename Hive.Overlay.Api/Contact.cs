@@ -2,13 +2,13 @@ using System.Runtime.Serialization;
 
 namespace Hive.Overlay.Api
 {
-    [DataContract]
     public class Contact
     {
-        [DataMember]
-        public byte[] NodeId { get; set; }
+        /// <summary>
+        /// 256bit Hive Address of the node this contact details are
+        /// </summary>
+        public byte[] Address { get; set; }
 
-        [DataMember]
         public string[] Uri { get; set; }
     }
 }

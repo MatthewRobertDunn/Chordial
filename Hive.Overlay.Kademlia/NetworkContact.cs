@@ -17,7 +17,7 @@ namespace Hive.Overlay.Kademlia
 
         public static NetworkContact Parse(Contact contact)
         {
-            return Parse(contact.NodeId, contact.Uri);
+            return Parse(contact.Address, contact.Uri);
         }
 
         public static bool TryParse(Contact contact, out NetworkContact result)
@@ -62,7 +62,7 @@ namespace Hive.Overlay.Kademlia
         {
             return new Contact()
             {
-                NodeId = Id.Data,
+                Address = Id.Data,
                 Uri = this.Uri.Select(x => x.ToString()).ToArray()
             };
         }

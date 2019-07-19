@@ -6,12 +6,8 @@
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <DocumentationFile>C:\Users\Matthew\source\repos\Chordial\Hive.Overlay.Peer\Hive.Overlay.Peer.xml</DocumentationFile>
+    <DocumentationFile>Hive.Overlay.Peer\Hive.Overlay.Peer.xml</DocumentationFile>
   </PropertyGroup>
-
-  <ItemGroup>
-    <None Remove="Hive.Overlay.Peer.xml" />
-  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore" Version="2.2.0" />
@@ -23,12 +19,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Hive.Overlay.Api\Hive.Overlay.Api.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Content Include="Hive.Overlay.Peer.xml">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
   </ItemGroup>
 
 </Project>
