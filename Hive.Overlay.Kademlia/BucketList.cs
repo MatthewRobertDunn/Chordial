@@ -180,8 +180,8 @@ namespace Hive.Overlay.Kademlia
             if (Contains(applicant.Id))
             {
                 // If they have a new address, record that
-                if (Get(applicant.Id).Uri
-                   != applicant.Uri)
+                if (Get(applicant.Id).UriDefault
+                   != applicant.UriDefault)
                 {
                     // Replace old one
                     Remove(applicant.Id);
