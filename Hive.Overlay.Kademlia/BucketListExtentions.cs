@@ -19,7 +19,7 @@ namespace Hive.Overlay.Kademlia
         {
             return _contactCache.CloseContacts(target)
                     .Take(8 * KadId.ID_LENGTH)
-                    .Where(x => x.Id != excluded)
+                    .Where(x => x.Address != excluded)
                     .ToList();
         }
 

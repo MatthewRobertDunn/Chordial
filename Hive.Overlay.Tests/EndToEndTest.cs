@@ -30,7 +30,6 @@ namespace Hive.Overlay.Tests
 
             var kernel = new StandardKernel();
 
-            kernel.Bind<IStorage>().To<SimpleStorage>();
             kernel.Bind<IKadmeliaPeer>().To<KadmeliaPeer>();
 
             //TODO:
@@ -52,17 +51,17 @@ namespace Hive.Overlay.Tests
                 );
 
             var peer = kernel.Get<IKadmeliaPeer>(new ConstructorArgument("myServerUri", new Uri("mem://0")));
-            peers[peer.Myself.UriDefault.ToString()] = peer;
+            peers[peer.Contact.UriDefault.ToString()] = peer;
             var rand = new Random();
-            for (int i = 1; i < 1000; i++)
+            for (int i = 1; i < 10000; i++)
             {
                 peer = kernel.Get<IKadmeliaPeer>(new ConstructorArgument("myServerUri", new Uri($"mem://{i}")));
-                peers[peer.Myself.UriDefault.ToString()] = peer;
+                peers[peer.Contact.UriDefault.ToString()] = peer;
                 peer.Client.Booststrap(new[] { "mem://0" });
             }
 
             byte[] key = Enumerable.Repeat<byte>(255, KadId.ID_LENGTH).ToArray();
-
+            var keyId = new KadId(key);
 
             //pick a random peer and try to get the data back
 
@@ -70,10 +69,13 @@ namespace Hive.Overlay.Tests
 
             var result = peer.Client.ClosestContacts(key);
 
-            var closeCount = result.ClosestPeers.Where(x => x.Id.Data[0] == 255).Count();
-            var closeExpected = peers.Values.Where(x => x.Myself.Id.Data[0] == 255).Count();
 
-            Assert.AreEqual(closeExpected, closeCount);
+            var closestTenExpected = peers.Values.OrderBy(x => x.Contact.Address ^ keyId).Take(10).Select(x => x.Contact.Address).ToList();
+            var closestTen = result.ClosestPeers.Select(x => x.Address).Take(10).ToList();
+
+            var closeCount = closestTenExpected.Intersect(closestTen).Count();
+
+            Assert.IsTrue(closeCount > 8);
         }
     }
 }

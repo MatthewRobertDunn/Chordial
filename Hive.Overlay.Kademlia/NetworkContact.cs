@@ -38,11 +38,11 @@ namespace Hive.Overlay.Kademlia
 
         public NetworkContact(KadId nodeId, IList<Uri> uri)
         {
-            this.Id = nodeId;
+            this.Address = nodeId;
             this.Uri = uri;
         }
 
-        public KadId Id { get; }
+        public KadId Address { get; }
 
         public IList<Uri> Uri { get; }
 
@@ -62,7 +62,7 @@ namespace Hive.Overlay.Kademlia
         {
             return new Contact()
             {
-                Address = Id.Data,
+                Address = Address.Data,
                 Uri = this.Uri.Select(x => x.ToString()).ToArray()
             };
         }

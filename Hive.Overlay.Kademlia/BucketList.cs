@@ -83,7 +83,7 @@ namespace Hive.Overlay.Kademlia
                 return; // Don't be silly.
             }
 
-            int bucket = BucketFor(toAdd.Id);
+            int bucket = BucketFor(toAdd.Address);
             buckets[bucket].Add(toAdd); // No lock: people can read while we do this.
         }
 
@@ -98,7 +98,7 @@ namespace Hive.Overlay.Kademlia
             int bucket = BucketFor(toGet);
             for (int i = 0; i < buckets[bucket].Count; i++)
             {
-                if (buckets[bucket][i].Id == toGet)
+                if (buckets[bucket][i].Address == toGet)
                 {
                     return buckets[bucket][i];
                 }
@@ -146,7 +146,7 @@ namespace Hive.Overlay.Kademlia
             int bucket = BucketFor(toRemove);
             for (int i = 0; i < buckets[bucket].Count; i++)
             {
-                if (buckets[bucket][i].Id == toRemove)
+                if (buckets[bucket][i].Address == toRemove)
                 {
                     buckets[bucket].RemoveAt(i);
                     return;
@@ -158,7 +158,7 @@ namespace Hive.Overlay.Kademlia
         [MethodImpl(MethodImplOptions.Synchronized)]
         public IList<NetworkContact> CloseContacts(KadId target)
         {
-            return AllContacts.OrderBy(x => x.Id ^ target)
+            return AllContacts.OrderBy(x => x.Address ^ target)
                               .ToList();
         }
 
@@ -174,28 +174,28 @@ namespace Hive.Overlay.Kademlia
         public void AddContact(NetworkContact applicant)
         {
             //Never add myself
-            if (applicant.Id == MySelf.Id)
+            if (applicant.Address == MySelf.Address)
                 return;
             // If we already know about them
-            if (Contains(applicant.Id))
+            if (Contains(applicant.Address))
             {
                 // If they have a new address, record that
-                if (Get(applicant.Id).UriDefault
+                if (Get(applicant.Address).UriDefault
                    != applicant.UriDefault)
                 {
                     // Replace old one
-                    Remove(applicant.Id);
+                    Remove(applicant.Address);
                     Put(applicant);
                 }
                 else
                 { // Just promote them
-                    Promote(applicant.Id);
+                    Promote(applicant.Address);
                 }
                 return;
             }
 
             // If we can fit them, do so
-            NetworkContact blocker = Blocker(applicant.Id);
+            NetworkContact blocker = Blocker(applicant.Address);
             if (blocker == null)
             {
                 Put(applicant);
@@ -218,7 +218,7 @@ namespace Hive.Overlay.Kademlia
         [MethodImpl(MethodImplOptions.Synchronized)]
         private void ReplaceBlocker(NetworkContact applicant, NetworkContact blocker)
         {
-            Remove(blocker.Id);
+            Remove(blocker.Address);
             Put(applicant);
         }
 
@@ -239,7 +239,7 @@ namespace Hive.Overlay.Kademlia
         /// <returns></returns>
         private int BucketFor(KadId id)
         {
-            return (this.MySelf.Id.DifferingBit(id));
+            return (this.MySelf.Address.DifferingBit(id));
         }
 
         /// <summary>
@@ -260,7 +260,7 @@ namespace Hive.Overlay.Kademlia
                     }
                     foreach (NetworkContact c in bucket)
                     {
-                        toReturn += "\n" + c.Id.ToString() + "@" + c.Uri.ToString();
+                        toReturn += "\n" + c.Address.ToString() + "@" + c.Uri.ToString();
                     }
                 }
             }

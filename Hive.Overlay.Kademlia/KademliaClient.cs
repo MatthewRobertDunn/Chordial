@@ -54,7 +54,7 @@ namespace Hive.Overlay.Kademlia
             }
 
             //Perform an iterative search for myself, this will populate my routing table further
-            IterativeFindNode(myself.Id);
+            IterativeFindNode(myself.Address);
             return true;
         }
 
@@ -85,13 +85,13 @@ namespace Hive.Overlay.Kademlia
             var shortlist = new SortedList<KadId, HaveAsked>();
 
             foreach (NetworkContact c in routingTable.CloseContacts(20, target))
-                shortlist.Add(c.Id ^ target, new HaveAsked() { Contact = c, Asked = false });
+                shortlist.Add(c.Address ^ target, new HaveAsked() { Contact = c, Asked = false });
 
             // Until we run out of people to ask or we're done...
             bool peersLeftToAsk = true;
             while (peersLeftToAsk)
             {
-                var closestPeerNotAsked = shortlist.Where(x => x.Value.Contact.Id != myself.Id && !x.Value.IsNotContactable)  //Don't ask myself, ignore not contactable nodes
+                var closestPeerNotAsked = shortlist.Where(x => x.Value.Contact.Address != myself.Address && !x.Value.IsNotContactable)  //Don't ask myself, ignore not contactable nodes
                                                         .Take(3)    //only consider the first 3 closest nodes
                                                         .Where(x => x.Value.Asked == false) //That we haven't asked before
                                                         .FirstOrDefault(); //Get the first
@@ -108,7 +108,7 @@ namespace Hive.Overlay.Kademlia
                 var remotePeerUri = closestPeerNotAsked.Value.Contact.UriDefault;
                 var peer = serverFactory(remotePeerUri);
 
-                SearchResult searchResult = peer.FindNode(myself.ToContact(), target.Data);
+                SearchResult searchResult = peer.CloseContacts(myself.ToContact(), target.Data);
 
                 //peer is down, ignore
                 if (searchResult == null)
@@ -124,7 +124,7 @@ namespace Hive.Overlay.Kademlia
                     // Add suggestions to shortlist and check for closest
                     foreach (NetworkContact suggestion in searchResult.Contacts.Select(x => NetworkContact.Parse(x)))
                     {
-                        var distance = suggestion.Id ^ target;
+                        var distance = suggestion.Address ^ target;
                         if (!shortlist.ContainsKey(distance))
                             shortlist.Add(distance, new HaveAsked() { Contact = suggestion });
 

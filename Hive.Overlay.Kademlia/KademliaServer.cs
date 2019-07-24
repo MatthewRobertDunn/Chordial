@@ -14,7 +14,7 @@ namespace Hive.Overlay.Kademlia
             this.routingTable = routingTable;
         }
 
-        public SearchResult FindNode(Contact senderId, byte[] key)
+        public SearchResult CloseContacts(Contact senderId, byte[] key)
         {
             routingTable.AddContact(NetworkContact.Parse(senderId));
             var result = routingTable.CloseContacts(new KadId(key), senderId.GetID());
@@ -25,7 +25,7 @@ namespace Hive.Overlay.Kademlia
         {
             Log("I was pinged!");
             routingTable.AddContact(NetworkContact.Parse(senderId));
-            return this.routingTable.MySelf.Id.Data;
+            return this.routingTable.MySelf.Address.Data;
         }
 
         /// <summary>

@@ -14,7 +14,7 @@ namespace Hive.Overlay.Api
         /// <param name="senderId"></param>
         /// <param name="key"></param>
         /// <returns></returns>
-        SearchResult FindNode(Contact senderId, byte[] key);
+        SearchResult CloseContacts(Contact senderId, byte[] key);
 
         /// <summary>
         /// Checks if a given peer is alive.

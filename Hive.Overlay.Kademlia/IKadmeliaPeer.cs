@@ -6,6 +6,6 @@ namespace Hive.Overlay.Kademlia
     {
         IKademilaClient Client { get; }
         IKadmeliaServer Server { get; }
-        NetworkContact Myself { get; }
+        NetworkContact Contact { get; }
     }
 }
