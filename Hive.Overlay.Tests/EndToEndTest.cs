@@ -52,31 +52,28 @@ namespace Hive.Overlay.Tests
                 );
 
             var peer = kernel.Get<IKadmeliaPeer>(new ConstructorArgument("myServerUri", new Uri("mem://0")));
-            peers[peer.Myself.Uri.ToString()] = peer;
+            peers[peer.Myself.UriDefault.ToString()] = peer;
             var rand = new Random();
             for (int i = 1; i < 1000; i++)
             {
                 peer = kernel.Get<IKadmeliaPeer>(new ConstructorArgument("myServerUri", new Uri($"mem://{i}")));
-                peers[peer.Myself.Uri.ToString()] = peer;
+                peers[peer.Myself.UriDefault.ToString()] = peer;
                 peer.Client.Booststrap(new[] { "mem://0" });
             }
 
             byte[] key = Enumerable.Repeat<byte>(255, KadId.ID_LENGTH).ToArray();
-
-            var putResult = peer.Client.Put(key, "This is a test key", new TimeSpan(0, 15, 0), 5);
 
 
             //pick a random peer and try to get the data back
 
             peer = peers.Values.Skip(rand.Next(peers.Count)).First();
 
-            var result = peer.Client.Get(key);
+            var result = peer.Client.ClosestContacts(key);
 
-            Assert.IsTrue(result.Values.Count == 1);
-            Assert.IsTrue(result.NumberIterations <= 3);
+            var closeCount = result.ClosestPeers.Where(x => x.Id.Data[0] == 255).Count();
+            var closeExpected = peers.Values.Where(x => x.Myself.Id.Data[0] == 255).Count();
 
-            Assert.IsTrue(result.Values[0] == "This is a test key");
-            var closePeers = peers.Values.Where(x => x.Myself.Id.Data[0] == 255).ToList();
+            Assert.AreEqual(closeExpected, closeCount);
         }
     }
 }

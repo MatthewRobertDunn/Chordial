@@ -7,13 +7,13 @@ namespace Hive.Overlay.Kademlia
     {
         public NetworkContact Myself { get; }
 
-        public KadmeliaPeer(IStorage storage, Uri myServerUri, Func<Uri, IKadmeliaServer> serverFactory)
+        public KadmeliaPeer(Uri myServerUri, Func<Uri, IKadmeliaServer> serverFactory)
         {
             var id = KadId.HostID();
             Myself = new NetworkContact(id, new[] { myServerUri });
             var cache = new BucketList(Myself, serverFactory);
-            this.client = new KademliaClient(cache, storage, serverFactory);
-            this.server = new KademliaServer(cache, storage);
+            this.client = new KademliaClient(cache, serverFactory);
+            this.server = new KademliaServer(cache);
         }
 
 

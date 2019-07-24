@@ -8,7 +8,6 @@ namespace Hive.Overlay.Kademlia
 {
     public class IterativeFindResult
     {
-        public IList<string> Values { get; set; }
         public int NumberIterations { get; set; }
         public NetworkContact TargetPeer { get; set; }
         public List<NetworkContact> ClosestPeers { get; set; }

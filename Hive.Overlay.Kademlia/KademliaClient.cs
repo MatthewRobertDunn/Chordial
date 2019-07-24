@@ -18,8 +18,6 @@ namespace Hive.Overlay.Kademlia
         private IBucketList routingTable;
 
         private Func<Uri, IKadmeliaServer> serverFactory;
-        private IStorage dataStore;
-
         //Whoami
         private NetworkContact myself;
 
@@ -27,10 +25,9 @@ namespace Hive.Overlay.Kademlia
         /// Make a node on a specific port, with a specified ID
         /// </summary>
         /// <param name="port"></param>
-        public KademliaClient(IBucketList cache, IStorage dataStore, Func<Uri, IKadmeliaServer> serverFactory)
+        public KademliaClient(IBucketList cache, Func<Uri, IKadmeliaServer> serverFactory)
         {
             this.routingTable = cache;
-            this.dataStore = dataStore;
             this.serverFactory = serverFactory;
             myself = cache.MySelf;
         }
@@ -61,56 +58,14 @@ namespace Hive.Overlay.Kademlia
             return true;
         }
 
-
-        public IterativeFindResult Put(byte[] key, string data, TimeSpan expires, int replicationFactor)
-        {
-            return IterativeStore(new KadId(key), data, DateTime.UtcNow, DateTime.UtcNow + expires, replicationFactor);
-        }
-
-        public IterativeFindResult Get(byte[] key)
-        {
-            var localStore = dataStore.GetItems(key);
-
-            if (localStore != null)
-                return new IterativeFindResult()
-                {
-
-                    Values = localStore.Select(x => x.Value).ToList(),
-                    TargetPeer = this.routingTable.MySelf,
-                };
-
-            var result = IterativeFind(new KadId(key), true);
-            return result;
-        }
-
-
-        /// <summary>
-        /// Do an iterativeStore operation and publish the key/value pair on the network
-        /// </summary>
-        /// <param name="key"></param>
-        /// <param name="val"></param>
-        private IterativeFindResult IterativeStore(KadId key, string val, DateTime originalInsertion, DateTime expires, int replicationFactor)
-        {
-            // Find the K closest nodes to the key
-            var closest = IterativeFindNode(key);
-            foreach (NetworkContact c in closest.ClosestPeers.Take(replicationFactor))
-            {
-                var peer = serverFactory(c.UriDefault);
-                peer.StoreValue(myself.ToContact(), key.Data, val, originalInsertion, expires);
-            }
-
-            return closest;
-        }
-
-
         /// <summary>
         /// Do an iterativeFindNode operation.
-        /// </summary>
+        /// </summary>f
         /// <param name="target"></param>
         /// <returns></returns>
         private IterativeFindResult IterativeFindNode(KadId target)
         {
-            return IterativeFind(target, false);
+            return IterativeFind(target);
         }
 
 
@@ -122,7 +77,7 @@ namespace Hive.Overlay.Kademlia
         /// <param name="getValue">true for FindValue, false for FindNode</param>
         /// <param name="vals"></param>
         /// <returns></returns>
-        private IterativeFindResult IterativeFind(KadId target, bool getValue)
+        private IterativeFindResult IterativeFind(KadId target)
         {
             IterativeFindResult result = new IterativeFindResult();
 
@@ -153,11 +108,7 @@ namespace Hive.Overlay.Kademlia
                 var remotePeerUri = closestPeerNotAsked.Value.Contact.UriDefault;
                 var peer = serverFactory(remotePeerUri);
 
-                SearchResult searchResult;
-                if (getValue)
-                    searchResult = peer.FindValue(myself.ToContact(), target.Data);
-                else
-                    searchResult = peer.FindNode(myself.ToContact(), target.Data);
+                SearchResult searchResult = peer.FindNode(myself.ToContact(), target.Data);
 
                 //peer is down, ignore
                 if (searchResult == null)
@@ -168,17 +119,10 @@ namespace Hive.Overlay.Kademlia
                     continue;
                 }
 
-                if (searchResult.Values != null)
-                {
-                    result.Values = searchResult.Values;
-                    result.TargetPeer = closestPeerNotAsked.Value.Contact;
-                    return result;
-                }
-
                 if (searchResult.Contacts != null)
                 {
                     // Add suggestions to shortlist and check for closest
-                    foreach (NetworkContact suggestion in searchResult.Contacts.Select(x=>NetworkContact.Parse(x)))
+                    foreach (NetworkContact suggestion in searchResult.Contacts.Select(x => NetworkContact.Parse(x)))
                     {
                         var distance = suggestion.Id ^ target;
                         if (!shortlist.ContainsKey(distance))
@@ -204,5 +148,9 @@ namespace Hive.Overlay.Kademlia
             Console.WriteLine(message);
         }
 
+        public IterativeFindResult ClosestContacts(byte[] key)
+        {
+            return IterativeFindNode(new KadId(key));
+        }
     }
 }
