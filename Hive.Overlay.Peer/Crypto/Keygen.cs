@@ -27,15 +27,15 @@ namespace Hive.Overlay.Peer.Crypto
 
 
             IAsymmetricCipherKeyPairGenerator issuerGen = GeneratorUtilities.GetKeyPairGenerator("ECDSA");
-            issuerGen.Init(new ECKeyGenerationParameters(SecObjectIdentifiers.SecP256k1, new SecureRandom()));
+            issuerGen.Init(new ECKeyGenerationParameters(SecObjectIdentifiers.SecP256r1, new SecureRandom()));
             AsymmetricCipherKeyPair issuerKeys = issuerGen.GenerateKeyPair();
 
             var keybytes = ((ECPrivateKeyParameters)issuerKeys.Private).D.ToByteArrayUnsigned();
             var key = new NBitcoin.Key(keybytes);
 
 
-            X509Certificate bcCert = CreateCert(bcSubjKeys, issuerKeys, "CN=Hive", "CN=HiveRoot");
-            X509Certificate issuerCert = CreateCert(issuerKeys, issuerKeys, "CN=HiveRoot, O=Bitcoin", "CN=HiveRoot");
+            X509Certificate bcCert = CreateCert(bcSubjKeys, issuerKeys, "CN=Hive", "CN=HiveRoot, O=Bitcoin");
+            X509Certificate issuerCert = CreateCert(issuerKeys, issuerKeys, "CN=HiveRoot, O=Bitcoin", "CN=HiveRoot, O=Bitcoin");
 
 
             //export keypair to a microsoft format in a roundabout way
@@ -44,7 +44,7 @@ namespace Hive.Overlay.Peer.Crypto
 
             var issuerCertEntry = new X509CertificateEntry(issuerCert);
             store.SetCertificateEntry(issuerCert.SubjectDN.ToString(), issuerCertEntry);
-            store.SetKeyEntry(issuerCert.SubjectDN.ToString(), new AsymmetricKeyEntry(issuerKeys.Private), new[] { issuerCertEntry });
+            //store.SetKeyEntry(issuerCert.SubjectDN.ToString(), new AsymmetricKeyEntry(issuerKeys.Private), new[] { issuerCertEntry });
 
             var certificateEntry = new X509CertificateEntry(bcCert);
 
@@ -89,16 +89,11 @@ namespace Hive.Overlay.Peer.Crypto
             bcXgen.SetSubjectDN(subjectDN);
             bcXgen.SetNotBefore(DateTime.Now);
             bcXgen.SetNotAfter(DateTime.Now.AddYears(100));
-            bcXgen.SetPublicKey(bcSubjKeys.Public);
             bcXgen.SetSerialNumber(new BC.Math.BigInteger(256, new SecureRandom()));
-
-            bcXgen.AddExtension(X509Extensions.CertificateIssuer, true, new KeyUsage(KeyUsage.KeyCertSign));
             // Basic Constraints - certificate is allowed to be used as intermediate.
             bcXgen.AddExtension(X509Extensions.BasicConstraints, true, new BasicConstraints(true));
 
-            //Key Usage(s)
-            bcXgen.AddExtension(X509Extensions.KeyUsage, true, new KeyUsage(KeyUsage.KeyCertSign));
-
+            bcXgen.SetPublicKey(bcSubjKeys.Public);
             ISignatureFactory bcSigFac = new Asn1SignatureFactory("SHA256WITHECDSA", issuerKeys.Private);
             var bcCert = bcXgen.Generate(bcSigFac);
             return bcCert;
