@@ -25,9 +25,14 @@ namespace Hive.Overlay.Peer.Crypto
             bcKpGen.Init(new ECKeyGenerationParameters(SecObjectIdentifiers.SecP256r1, new SecureRandom()));
             AsymmetricCipherKeyPair bcSubjKeys = bcKpGen.GenerateKeyPair();
 
+
             IAsymmetricCipherKeyPairGenerator issuerGen = GeneratorUtilities.GetKeyPairGenerator("ECDSA");
-            issuerGen.Init(new ECKeyGenerationParameters(SecObjectIdentifiers.SecP256r1, new SecureRandom()));
+            issuerGen.Init(new ECKeyGenerationParameters(SecObjectIdentifiers.SecP256k1, new SecureRandom()));
             AsymmetricCipherKeyPair issuerKeys = issuerGen.GenerateKeyPair();
+
+            var keybytes = ((ECPrivateKeyParameters)issuerKeys.Private).D.ToByteArrayUnsigned();
+            var key = new NBitcoin.Key(keybytes);
+
 
             X509Certificate bcCert = CreateCert(bcSubjKeys, issuerKeys, "CN=Hive", "CN=HiveRoot");
             X509Certificate issuerCert = CreateCert(issuerKeys, issuerKeys, "CN=HiveRoot, O=Bitcoin", "CN=HiveRoot");
@@ -35,13 +40,16 @@ namespace Hive.Overlay.Peer.Crypto
 
             //export keypair to a microsoft format in a roundabout way
             var store = new Pkcs12Store();
-            string friendlyName = bcCert.SubjectDN.ToString();
+            
+
+            var issuerCertEntry = new X509CertificateEntry(issuerCert);
+            store.SetCertificateEntry(issuerCert.SubjectDN.ToString(), issuerCertEntry);
+            store.SetKeyEntry(issuerCert.SubjectDN.ToString(), new AsymmetricKeyEntry(issuerKeys.Private), new[] { issuerCertEntry });
 
             var certificateEntry = new X509CertificateEntry(bcCert);
-            var issuerCertEntry = new X509CertificateEntry(issuerCert);
-            store.SetCertificateEntry("issuer", issuerCertEntry);
-            store.SetCertificateEntry(friendlyName, certificateEntry);
-            store.SetKeyEntry(friendlyName, new AsymmetricKeyEntry(bcSubjKeys.Private), new[] { certificateEntry });
+
+            store.SetCertificateEntry(bcCert.SubjectDN.ToString(), certificateEntry);
+            store.SetKeyEntry(bcCert.SubjectDN.ToString(), new AsymmetricKeyEntry(bcSubjKeys.Private), new[] { certificateEntry });
 
             const string password = "password";
             var stream = new MemoryStream();
@@ -58,7 +66,7 @@ namespace Hive.Overlay.Peer.Crypto
                     stream.ToArray(), password,
                     MS.X509Certificates.X509KeyStorageFlags.PersistKeySet | MS.X509Certificates.X509KeyStorageFlags.Exportable);
 
-
+            
             var ch = new MS.X509Certificates.X509Chain();
 
             ch.ChainPolicy.RevocationMode = MS.X509Certificates.X509RevocationMode.NoCheck;
@@ -83,6 +91,13 @@ namespace Hive.Overlay.Peer.Crypto
             bcXgen.SetNotAfter(DateTime.Now.AddYears(100));
             bcXgen.SetPublicKey(bcSubjKeys.Public);
             bcXgen.SetSerialNumber(new BC.Math.BigInteger(256, new SecureRandom()));
+
+            bcXgen.AddExtension(X509Extensions.CertificateIssuer, true, new KeyUsage(KeyUsage.KeyCertSign));
+            // Basic Constraints - certificate is allowed to be used as intermediate.
+            bcXgen.AddExtension(X509Extensions.BasicConstraints, true, new BasicConstraints(true));
+
+            //Key Usage(s)
+            bcXgen.AddExtension(X509Extensions.KeyUsage, true, new KeyUsage(KeyUsage.KeyCertSign));
 
             ISignatureFactory bcSigFac = new Asn1SignatureFactory("SHA256WITHECDSA", issuerKeys.Private);
             var bcCert = bcXgen.Generate(bcSigFac);
