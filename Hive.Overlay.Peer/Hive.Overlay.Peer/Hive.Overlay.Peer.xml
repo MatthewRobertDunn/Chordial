@@ -17,6 +17,7 @@
             Returns a list of nodes closest to the given network address.
             Set 'address' to the hive address you are searching for.
             </summary>
+            <param name="address"></param>
             <param name="request">Base64 encoded string containing the hive address you are searching for</param>
             <returns>A list of nodes closest to the requested address</returns>
         </member>

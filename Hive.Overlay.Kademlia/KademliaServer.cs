@@ -1,5 +1,6 @@
 ﻿using Hive.Overlay.Api;
 using System;
+using System.Diagnostics;
 using System.Linq;
 
 namespace Hive.Overlay.Kademlia
@@ -14,13 +15,13 @@ namespace Hive.Overlay.Kademlia
             this.routingTable = routingTable;
         }
 
-        public SearchResult CloseContacts(byte[] key, Contact senderId)
+        public Contact[] CloseContacts(byte[] key, Contact senderId)
         {
             if (senderId != null)
                 routingTable.AddContact(NetworkContact.Parse(senderId));
 
             var result = routingTable.CloseContacts(new KadId(key), senderId.GetID());
-            return new SearchResult() { Contacts = result.Select(x => x.ToContact()).ToArray() };
+            return result.Select(x => x.ToContact()).ToArray();
         }
 
         public byte[] Address(Contact senderId)
@@ -38,7 +39,7 @@ namespace Hive.Overlay.Kademlia
         /// <param name="message"></param>
         private void Log(string message)
         {
-            Console.WriteLine(message);
+            Trace.WriteLine(message);
         }
 
     }

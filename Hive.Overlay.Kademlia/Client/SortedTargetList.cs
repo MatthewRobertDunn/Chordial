@@ -6,8 +6,6 @@ using System.Threading.Tasks;
 
 namespace Hive.Overlay.Kademlia
 {
-
-
     public class HaveAsked
     {
         public NetworkContact Contact { get; set; }

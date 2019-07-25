@@ -107,11 +107,11 @@ namespace Hive.Overlay.Kademlia
                 closestPeerNotAsked.Value.Asked = true;
                 var remotePeerUri = closestPeerNotAsked.Value.Contact.UriDefault;
 
-                SearchResult searchResult = null;
+                Contact[] searchResults = null;
                 try
                 {
                     var peer = serverFactory(remotePeerUri);
-                    searchResult = peer.CloseContacts(target.Data, myself.ToContact());
+                    searchResults = peer.CloseContacts(target.Data, myself.ToContact());
                 }
                 catch (Exception ex)
                 {
@@ -122,10 +122,10 @@ namespace Hive.Overlay.Kademlia
                     continue;
                 }
 
-                if (searchResult.Contacts != null)
+                if (searchResults != null)
                 {
                     // Add suggestions to shortlist and check for closest
-                    foreach (NetworkContact suggestion in searchResult.Contacts.Select(x => NetworkContact.Parse(x)))
+                    foreach (NetworkContact suggestion in searchResults.Select(x => NetworkContact.Parse(x)))
                     {
                         var distance = suggestion.Address ^ target;
                         if (!shortlist.ContainsKey(distance))
