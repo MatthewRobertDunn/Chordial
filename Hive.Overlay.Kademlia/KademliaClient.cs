@@ -47,7 +47,7 @@ namespace Hive.Overlay.Kademlia
                 var bootstrapPeer = serverFactory(remotePeerUri);
 
                 //Get the remote peers ID, pass it my own contact details
-                var remotePeerID = bootstrapPeer.Ping(myself.ToContact());
+                var remotePeerID = bootstrapPeer.Address(myself.ToContact());
                 //Add this peer to my routing table if alive
                 if (remotePeerID != null)
                     routingTable.AddContact(NetworkContact.Parse(remotePeerID, new[] { uri }));

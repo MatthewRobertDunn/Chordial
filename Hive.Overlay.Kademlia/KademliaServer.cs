@@ -23,7 +23,7 @@ namespace Hive.Overlay.Kademlia
             return new SearchResult() { Contacts = result.Select(x => x.ToContact()).ToArray() };
         }
 
-        public byte[] Ping(Contact senderId)
+        public byte[] Address(Contact senderId)
         {
             Log("I was pinged!");
             if (senderId != null)

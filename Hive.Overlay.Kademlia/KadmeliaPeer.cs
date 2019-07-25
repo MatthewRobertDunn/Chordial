@@ -11,7 +11,7 @@ namespace Hive.Overlay.Kademlia
         {
             var id = KadId.HostID();
             Contact = new NetworkContact(id, new[] { myServerUri });
-            var cache = new BucketList(Contact, serverFactory);
+            var cache = new RoutingTable(Contact, serverFactory);
             this.client = new KademliaClient(cache, serverFactory);
             this.server = new KademliaServer(cache);
         }

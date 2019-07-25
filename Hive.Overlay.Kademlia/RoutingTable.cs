@@ -12,7 +12,7 @@ namespace Hive.Overlay.Kademlia
     /// Also responsible for storing last lookup times for buckets, so we can refresh them.
     /// Not thread safe for multiple people writing at once, since you can't enforce preconditions.
     /// </summary>
-    public class BucketList : IRoutingTable
+    public class RoutingTable : IRoutingTable
     {
         private const int BUCKET_SIZE = 20; // "K" in the spec
         private const int NUM_BUCKETS = 8 * KadId.ID_LENGTH; // One per bit in an ID
@@ -25,7 +25,7 @@ namespace Hive.Overlay.Kademlia
         /// Make a new bucket list, for holding node contacts.
         /// </summary>
         /// <param name="mySelf">The ID to center the list on.</param>
-        public BucketList(NetworkContact mySelf, Func<Uri, IKadmeliaServer> serverFactory)
+        public RoutingTable(NetworkContact mySelf, Func<Uri, IKadmeliaServer> serverFactory)
         {
             this.MySelf = mySelf;
             buckets = new List<List<NetworkContact>>(NUM_BUCKETS);
@@ -229,7 +229,7 @@ namespace Hive.Overlay.Kademlia
             try
             {
                 var peer = serverFactory(remotePeerUri);
-                var pingResult = peer.Ping(MySelf.ToContact());
+                var pingResult = peer.Address(MySelf.ToContact());
                 return pingResult.Length == KadId.ID_LENGTH;
             }
             catch (Exception ex)

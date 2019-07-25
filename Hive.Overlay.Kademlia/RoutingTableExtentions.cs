@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Hive.Overlay.Kademlia
 {
-    public static class BucketListExtentions
+    public static class RoutingTableExtentions
     {
 
         public static List<NetworkContact> CloseContacts(this IRoutingTable _contactCache, int count, KadId target)

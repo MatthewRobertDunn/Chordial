@@ -21,6 +21,6 @@ namespace Hive.Overlay.Api
         /// </summary>
         /// <param name="senderId"></param>
         /// <returns></returns>
-        byte[] Ping(Contact senderId = null);
+        byte[] Address(Contact senderId = null);
     }
 }
