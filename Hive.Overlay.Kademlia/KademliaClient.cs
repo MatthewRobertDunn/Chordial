@@ -15,7 +15,7 @@ namespace Hive.Overlay.Kademlia
 
 
         // Network State
-        private IBucketList routingTable;
+        private IRoutingTable routingTable;
 
         private Func<Uri, IKadmeliaServer> serverFactory;
         //Whoami
@@ -25,7 +25,7 @@ namespace Hive.Overlay.Kademlia
         /// Make a node on a specific port, with a specified ID
         /// </summary>
         /// <param name="port"></param>
-        public KademliaClient(IBucketList cache, Func<Uri, IKadmeliaServer> serverFactory)
+        public KademliaClient(IRoutingTable cache, Func<Uri, IKadmeliaServer> serverFactory)
         {
             this.routingTable = cache;
             this.serverFactory = serverFactory;
@@ -106,13 +106,16 @@ namespace Hive.Overlay.Kademlia
 
                 closestPeerNotAsked.Value.Asked = true;
                 var remotePeerUri = closestPeerNotAsked.Value.Contact.UriDefault;
-                var peer = serverFactory(remotePeerUri);
 
-                SearchResult searchResult = peer.CloseContacts(myself.ToContact(), target.Data);
-
-                //peer is down, ignore
-                if (searchResult == null)
+                SearchResult searchResult = null;
+                try
                 {
+                    var peer = serverFactory(remotePeerUri);
+                    searchResult = peer.CloseContacts(target.Data, myself.ToContact());
+                }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Trace.TraceError("Could not contact peer {0} {1}", remotePeerUri, ex.Message);
                     closestPeerNotAsked.Value.IsNotContactable = true;
                     //If we can't contact this peer, why have them in our routing table?
                     routingTable.Remove(closestPeerNotAsked.Key);

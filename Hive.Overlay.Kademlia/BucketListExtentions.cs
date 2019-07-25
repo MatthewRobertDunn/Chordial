@@ -9,13 +9,13 @@ namespace Hive.Overlay.Kademlia
     public static class BucketListExtentions
     {
 
-        public static List<NetworkContact> CloseContacts(this IBucketList _contactCache, int count, KadId target)
+        public static List<NetworkContact> CloseContacts(this IRoutingTable _contactCache, int count, KadId target)
         {
             return _contactCache.CloseContacts(target)
                     .Take(count).ToList();
         }
 
-        public static List<NetworkContact> CloseContacts(this IBucketList _contactCache, KadId target, KadId excluded)
+        public static List<NetworkContact> CloseContacts(this IRoutingTable _contactCache, KadId target, KadId excluded)
         {
             return _contactCache.CloseContacts(target)
                     .Take(8 * KadId.ID_LENGTH)

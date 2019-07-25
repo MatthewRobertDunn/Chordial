@@ -11,16 +11,22 @@ namespace Hive.Overlay.Peer.Controllers
     [ApiController]
     public class HiveController : ControllerBase
     {
+        private readonly IKadmeliaServer kadmeliaServer;
+
+        public HiveController(IKadmeliaServer kadmeliaServer)
+        {
+            this.kadmeliaServer = kadmeliaServer;
+        }
         /// <summary>
         /// Returns a list of nodes closest to the given network address.
         /// Set 'address' to the hive address you are searching for.
         /// </summary>
         /// <param name="request"></param>
         /// <returns>A list of nodes closest to the requested address</returns>
-        [HttpPost("/findnode/")]
-        public SearchResult FindNode(ClosestNodeSearch request)
+        [HttpPost("/closecontacts/")]
+        public SearchResult CloseContacts(ClosestNodeSearch request)
         {
-            return new SearchResult();
+            return this.kadmeliaServer.CloseContacts(request.Address, request.RequestedBy);
         }
 
         /// <summary>
@@ -29,10 +35,10 @@ namespace Hive.Overlay.Peer.Controllers
         /// </summary>
         /// <param name="request">Base64 encoded string containing the hive address you are searching for</param>
         /// <returns>A list of nodes closest to the requested address</returns>
-        [HttpGet("/findnode/{address}")]
-        public SearchResult FindNode([FromQuery] string address)
+        [HttpGet("/closecontacts/")]
+        public SearchResult CloseContacts([FromQuery] string address)
         {
-            return new SearchResult();
+            return this.kadmeliaServer.CloseContacts(Convert.FromBase64String(address), null);
         }
 
     }

@@ -14,13 +14,13 @@ namespace Hive.Overlay.Api
         /// <param name="senderId"></param>
         /// <param name="key"></param>
         /// <returns></returns>
-        SearchResult CloseContacts(Contact senderId, byte[] key);
+        SearchResult CloseContacts(byte[] key, Contact senderId = null);
 
         /// <summary>
         /// Checks if a given peer is alive.
         /// </summary>
         /// <param name="senderId"></param>
         /// <returns></returns>
-        byte[] Ping(Contact senderId);
+        byte[] Ping(Contact senderId = null);
     }
 }

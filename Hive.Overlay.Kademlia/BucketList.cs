@@ -12,7 +12,7 @@ namespace Hive.Overlay.Kademlia
     /// Also responsible for storing last lookup times for buckets, so we can refresh them.
     /// Not thread safe for multiple people writing at once, since you can't enforce preconditions.
     /// </summary>
-    public class BucketList : IBucketList
+    public class BucketList : IRoutingTable
     {
         private const int BUCKET_SIZE = 20; // "K" in the spec
         private const int NUM_BUCKETS = 8 * KadId.ID_LENGTH; // One per bit in an ID
@@ -226,9 +226,17 @@ namespace Hive.Overlay.Kademlia
         {
             // We can't fit them. We have to choose between blocker and applicant
             var remotePeerUri = blocker.UriDefault;
-            var peer = serverFactory(remotePeerUri);
-            var pingResult = peer.Ping(MySelf.ToContact());
-            return pingResult != null;
+            try
+            {
+                var peer = serverFactory(remotePeerUri);
+                var pingResult = peer.Ping(MySelf.ToContact());
+                return pingResult.Length == KadId.ID_LENGTH;
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Trace.TraceError("Could not contact peer {0} {1}", remotePeerUri, ex.Message);
+                return false;
+            }
         }
 
         /// <summary>

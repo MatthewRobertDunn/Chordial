@@ -2,7 +2,10 @@
 
 namespace Hive.Overlay.Kademlia
 {
-    public interface IBucketList
+    /// <summary>
+    /// Implements kademlia routing table scheme.
+    /// </summary>
+    public interface IRoutingTable
     {
         NetworkContact MySelf { get; }
         NetworkContact Blocker(KadId toAdd);

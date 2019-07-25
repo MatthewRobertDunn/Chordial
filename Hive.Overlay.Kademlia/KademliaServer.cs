@@ -7,16 +7,18 @@ namespace Hive.Overlay.Kademlia
     public class KademliaServer : IKadmeliaServer
     {
         // Network State
-        private readonly IBucketList routingTable;
+        private readonly IRoutingTable routingTable;
         private readonly TimeSpan allowedClockSkew = new TimeSpan(0, 30, 0);
-        public KademliaServer(IBucketList routingTable)
+        public KademliaServer(IRoutingTable routingTable)
         {
             this.routingTable = routingTable;
         }
 
-        public SearchResult CloseContacts(Contact senderId, byte[] key)
+        public SearchResult CloseContacts(byte[] key, Contact senderId)
         {
-            routingTable.AddContact(NetworkContact.Parse(senderId));
+            if (senderId != null)
+                routingTable.AddContact(NetworkContact.Parse(senderId));
+
             var result = routingTable.CloseContacts(new KadId(key), senderId.GetID());
             return new SearchResult() { Contacts = result.Select(x => x.ToContact()).ToArray() };
         }
@@ -24,7 +26,9 @@ namespace Hive.Overlay.Kademlia
         public byte[] Ping(Contact senderId)
         {
             Log("I was pinged!");
-            routingTable.AddContact(NetworkContact.Parse(senderId));
+            if (senderId != null)
+                routingTable.AddContact(NetworkContact.Parse(senderId));
+
             return this.routingTable.MySelf.Address.Data;
         }
 
