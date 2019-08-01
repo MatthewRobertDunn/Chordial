@@ -33,7 +33,7 @@ namespace Hive.Cryptography.Primitives
         /// <returns></returns>
         public static byte[] DeriveKey(this byte[] sharedKey, byte[] salt, string info, int length)
         {
-            var keygen = new HkdfBytesGenerator(new Sha256Digest());
+            var keygen = new HkdfBytesGenerator(new Sha3Digest(256));
             keygen.Init(new HkdfParameters(sharedKey, salt, ASCIIEncoding.Default.GetBytes(info)));
             var derivedKey = new byte[length];
             keygen.GenerateBytes(derivedKey, 0, length);
