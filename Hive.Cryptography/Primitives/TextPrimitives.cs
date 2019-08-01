@@ -11,5 +11,10 @@ namespace Hive.Cryptography.Primitives
                 return null;
             return UTF8Encoding.Default.GetString(base64Text);
         }
+
+        public static byte[] ToAsciiBytes(this string data)
+        {
+            return ASCIIEncoding.ASCII.GetBytes(data);
+        }
     }
 }

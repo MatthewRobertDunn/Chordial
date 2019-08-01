@@ -35,9 +35,9 @@ namespace Hive.Cryptography
             this.sharedKey = privateKey.GetSharedKey(publicKey);
 
             //nonce for chacha.
-            this.symmetricNonce = this.sharedKey.DeriveKey(null, nonceKeyDeriveInfoText, 12);
+            this.symmetricNonce = this.sharedKey.DeriveKey(nonceKeyDeriveInfoText.ToAsciiBytes(), 12);
         }
-
+            
         /// <summary>
         /// Decrypts a hiv compact form message.
         /// </summary>
@@ -50,7 +50,7 @@ namespace Hive.Cryptography
 
             //Derive the 256bit chachapoly key from the sharedkey and the message IV.
             //this is unique per message.
-            var symmetricKey = this.sharedKey.DeriveKey(aeadMessage.InitializationVector, symmetricKeyDeriveInfoText, 32);
+            var symmetricKey = this.sharedKey.DeriveKey(aeadMessage.InitializationVector, 32);
 
             //Decrypt the ciphertext and verify the additional data section using the symmetric key and nonce.
             var plainText = symmetricKey.Decrypt(this.symmetricNonce, aeadMessage.AdditionalData, aeadMessage.CipherText);

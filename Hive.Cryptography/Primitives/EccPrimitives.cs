@@ -5,6 +5,7 @@ using Org.BouncyCastle.Crypto.Parameters;
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Linq;
 
 namespace Hive.Cryptography.Primitives
 {
@@ -26,19 +27,25 @@ namespace Hive.Cryptography.Primitives
         /// <summary>
         /// Derives a key using a given shared salt and a DH shared key.
         /// </summary>
-        /// <param name="sharedKey"></param>
-        /// <param name="saltText"></param>
-        /// <param name="info"></param>
+        /// <param name="secret"></param>
+        /// <param name="salt"></param>
         /// <param name="length"></param>
         /// <returns></returns>
-        public static byte[] DeriveKey(this byte[] sharedKey, byte[] salt, string info, int length)
+        public static byte[] DeriveKey(this byte[] secret, byte[] salt, int length)
         {
-            var keygen = new HkdfBytesGenerator(new Sha3Digest(256));
-            keygen.Init(new HkdfParameters(sharedKey, salt, ASCIIEncoding.Default.GetBytes(info)));
+            var key = secret.Concat(salt).ToArray();
+            var shake = new ShakeDigest(256);
+            shake.BlockUpdate(key, 0, key.Length);
             var derivedKey = new byte[length];
-            keygen.GenerateBytes(derivedKey, 0, length);
+            shake.DoFinal(derivedKey, 0, length);
             return derivedKey;
         }
+
+
+      /*  public static byte[] DeriveKey2(this byte[] sharedKey, byte[] salt, string info, int length)
+        {
+            var digest = new ShakeDigest(256);
+        }*/
 
 
         /// <summary>
