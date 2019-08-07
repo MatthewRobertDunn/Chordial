@@ -49,7 +49,7 @@ namespace Hive.Overlay.Peer.Controllers
         /// <param name="request"></param>
         /// <returns></returns>
         [HttpPost("/address/")]
-        public byte[] Address(ClosestNodeSearch request)
+        public byte[] Address(HiveRequest request)
         {
             return this.kadmeliaServer.Address(request.RequestedBy);
         }
