@@ -17,6 +17,7 @@ namespace Hive.Overlay.Peer.Controllers
         {
             //this.kadmeliaServer = kadmeliaServer;
         }
+
         /// <summary>
         /// Returns a list of nodes closest to the given network address.
         /// Set 'address' to the hive address you are searching for.
@@ -40,6 +41,23 @@ namespace Hive.Overlay.Peer.Controllers
         public Contact[] CloseContacts([FromQuery] string address)
         {
             return this.kadmeliaServer.CloseContacts(Convert.FromBase64String(address), null);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="request"></param>
+        /// <returns></returns>
+        [HttpPost("/address/")]
+        public byte[] Address(ClosestNodeSearch request)
+        {
+            return this.kadmeliaServer.Address(request.RequestedBy);
+        }
+
+        [HttpGet("/address/")]
+        public byte[] Address()
+        {
+            return this.kadmeliaServer.Address();
         }
 
     }
