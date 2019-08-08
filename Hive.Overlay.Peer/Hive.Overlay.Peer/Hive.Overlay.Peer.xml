@@ -21,6 +21,13 @@
             <param name="request">Base64 encoded string containing the hive address you are searching for</param>
             <returns>A list of nodes closest to the requested address</returns>
         </member>
+        <member name="M:Hive.Overlay.Peer.Controllers.HiveController.Address(Hive.Overlay.Peer.Dto.HiveRequest)">
+            <summary>
+            
+            </summary>
+            <param name="request"></param>
+            <returns></returns>
+        </member>
         <member name="T:Hive.Overlay.Peer.Dto.ClosestNodeSearch">
             <summary>
             Request message sent to perform a closest nodes search

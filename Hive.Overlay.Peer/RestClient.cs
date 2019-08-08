@@ -23,7 +23,7 @@ namespace Hive.Overlay.Peer
 
         public Contact[] CloseContacts(byte[] key, Contact senderId = null)
         {
-            return PostAsync<Contact, byte[]>("closecontacts", senderId);
+            return PostAsync<Contact, Contact[]>("closecontacts", senderId);
         }
 
         private TResult PostAsync<TModel, TResult>(string restPath, TModel model)

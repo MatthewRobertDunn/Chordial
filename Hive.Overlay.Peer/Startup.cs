@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using Hive.Overlay.Api;
+using Hive.Overlay.Kademlia;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
@@ -36,6 +38,11 @@ namespace Hive.Overlay.Peer
                 var filePath = Path.Combine(System.AppContext.BaseDirectory, "Hive.Overlay.Peer.xml");
                 c.IncludeXmlComments(filePath);
             });
+
+
+            services.AddSingleton<Func<Uri, IKadmeliaServer>>(uri => new RestClient(uri));
+            services.AddSingleton<IRoutingTable, RoutingTable>();
+
         }
 
 

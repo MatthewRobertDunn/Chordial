@@ -22,10 +22,6 @@ namespace Hive.Overlay.Peer
 
         public static IWebHostBuilder CreateWebHostBuilder(string[] args)
         {
-            var bitkey = new NBitcoin.Key();
-            var secret = bitkey.GetBitcoinSecret(NBitcoin.Network.TestNet);
-
-
             return WebHost.CreateDefaultBuilder(args)
                 .UseKestrel(options =>
                 {

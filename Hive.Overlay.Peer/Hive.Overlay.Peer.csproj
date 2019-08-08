@@ -21,6 +21,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Hive.Overlay.Api\Hive.Overlay.Api.csproj" />
+    <ProjectReference Include="..\Hive.Overlay.Kademlia\Hive.Overlay.Kademlia.csproj" />
   </ItemGroup>
 
 </Project>
