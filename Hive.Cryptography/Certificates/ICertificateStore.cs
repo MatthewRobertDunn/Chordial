@@ -18,14 +18,14 @@ namespace Hive.Cryptography.Certificates
         /// <summary>
         /// Provides access to the key intended for the transport layer
         /// </summary>
-        X509Certificate2 Transport { get; }
+        CertWithPrivateKey Transport { get; }
         /// <summary>
         /// Provides access to the key intended for public signing
         /// </summary>
-        X509Certificate Signing { get; }
+        CertWithPrivateKey Channel { get; }
         /// <summary>
         /// Provides access to the key intended for private messages.
         /// </summary>
-        X509Certificate Private { get; }
+        CertWithPrivateKey Private { get; }
     }
 }

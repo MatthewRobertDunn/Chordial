@@ -42,10 +42,10 @@ namespace Hive.Cryptography.Primitives
         }
 
 
-      /*  public static byte[] DeriveKey2(this byte[] sharedKey, byte[] salt, string info, int length)
-        {
-            var digest = new ShakeDigest(256);
-        }*/
+        /*  public static byte[] DeriveKey2(this byte[] sharedKey, byte[] salt, string info, int length)
+          {
+              var digest = new ShakeDigest(256);
+          }*/
 
 
         /// <summary>
