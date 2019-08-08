@@ -6,6 +6,7 @@ using Org.BouncyCastle.Crypto;
 using Org.BouncyCastle.Crypto.Operators;
 using Org.BouncyCastle.Crypto.Parameters;
 using Org.BouncyCastle.Math;
+using Org.BouncyCastle.Pkcs;
 using Org.BouncyCastle.Security;
 using Org.BouncyCastle.X509;
 using System;
@@ -22,6 +23,20 @@ namespace Hive.Cryptography.Primitives
             IAsymmetricCipherKeyPairGenerator bcKpGen = GeneratorUtilities.GetKeyPairGenerator(algorithm);
             bcKpGen.Init(new ECKeyGenerationParameters(sec, new SecureRandom()));
             return bcKpGen.GenerateKeyPair();
+        }
+
+        public static Pkcs12Store CreateStore(CertWithPrivateKey root,  IEnumerable<CertWithPrivateKey> certs)
+        {
+            var store = new Pkcs12Store();
+
+            foreach (var cert in certs)
+            {
+                var issuerCertEntry = new X509CertificateEntry(cert.Certificate);
+                var alias = cert.Certificate.SubjectDN.ToString();
+                store.SetCertificateEntry(alias, issuerCertEntry);
+                store.SetKeyEntry(alias, new AsymmetricKeyEntry(cert.PrivateKey),);
+            }
+
         }
 
 

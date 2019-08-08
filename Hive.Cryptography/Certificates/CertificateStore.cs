@@ -27,6 +27,12 @@ namespace Hive.Cryptography.Certificates
             //Todo: Save to disk
         }
 
+        
+        private bool Save()
+        {
+
+        }
+
         public bool Load()
         {
             //todo: load
