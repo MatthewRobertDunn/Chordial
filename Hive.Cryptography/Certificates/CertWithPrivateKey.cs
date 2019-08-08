@@ -1,4 +1,5 @@
 ﻿using Org.BouncyCastle.Crypto;
+using Org.BouncyCastle.Crypto.Parameters;
 using Org.BouncyCastle.X509;
 using System;
 using System.Collections.Generic;
@@ -8,12 +9,12 @@ namespace Hive.Cryptography.Certificates
 {
     public class CertWithPrivateKey
     {
-        public CertWithPrivateKey(X509Certificate certificate, AsymmetricKeyParameter privateKey)
+        public CertWithPrivateKey(X509Certificate certificate, ECPrivateKeyParameters privateKey)
         {
             this.PrivateKey = privateKey;
             this.Certificate = certificate;
         }
-        public AsymmetricKeyParameter PrivateKey { get; }
+        public ECPrivateKeyParameters PrivateKey { get; }
         public X509Certificate Certificate { get; }
     }
 }

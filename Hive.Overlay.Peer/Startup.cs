@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using Hive.Cryptography.Certificates;
 using Hive.Overlay.Api;
 using Hive.Overlay.Kademlia;
 using Microsoft.AspNetCore.Builder;
@@ -40,9 +41,11 @@ namespace Hive.Overlay.Peer
             });
 
 
+            var certStore = new CertificateStore();
+            certStore.Generate();
+            services.AddSingleton<ICertificateStore>(certStore);
             services.AddSingleton<Func<Uri, IKadmeliaServer>>(uri => new RestClient(uri));
             services.AddSingleton<IRoutingTable, RoutingTable>();
-
         }
 
 

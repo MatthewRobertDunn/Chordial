@@ -12,10 +12,6 @@ namespace Hive.Overlay.Peer
         public static void Main(string[] args)
         {
             Console.WriteLine("Hive node starting...");
-
-            Console.WriteLine("Generating certificate");
-            var keygen = new KeyGen();
-            Certificate = keygen.Generate();
             Console.WriteLine("Starting web server");
             CreateWebHostBuilder(args).Build().Run();
         }

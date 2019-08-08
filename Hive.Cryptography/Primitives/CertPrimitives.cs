@@ -19,7 +19,7 @@ namespace Hive.Cryptography.Primitives
         private static AsymmetricCipherKeyPair GenerateKeyPair(DerObjectIdentifier sec, string algorithm = "ECDSA")
         {
             //create keypair
-            IAsymmetricCipherKeyPairGenerator bcKpGen = GeneratorUtilities.GetKeyPairGenerator("ECDSA");
+            IAsymmetricCipherKeyPairGenerator bcKpGen = GeneratorUtilities.GetKeyPairGenerator(algorithm);
             bcKpGen.Init(new ECKeyGenerationParameters(sec, new SecureRandom()));
             return bcKpGen.GenerateKeyPair();
         }
@@ -28,18 +28,23 @@ namespace Hive.Cryptography.Primitives
         public static CertWithPrivateKey CreateRootCertificate()
         {
             var issuerKeys = GenerateKeyPair(SecObjectIdentifiers.SecP256r1);
-            var cert =  CreateRootCert(issuerKeys, issuerKeys.Private, "CN=HiveRoot, O=Bitcoin");
-            return new CertWithPrivateKey(cert, issuerKeys.Private);
-            
+            var cert = CreateRootCert(issuerKeys, issuerKeys.Private, "CN=HiveRoot, O=Bitcoin");
+            return new CertWithPrivateKey(cert, (ECPrivateKeyParameters)issuerKeys.Private);
+
         }
 
+        public static byte[] GetThumbprint(this X509Certificate cert)
+        {
+            var pub = (ECPublicKeyParameters)cert.GetPublicKey();
+            return pub.Q.GetEncoded().SHAThree256();
+        }
 
-        public static CertWithPrivateKey CreateChildCertificate(CertWithPrivateKey issuer, string subject, string algorithm="ECDSA")
+        public static CertWithPrivateKey CreateChildCertificate(CertWithPrivateKey issuer, string subject, string algorithm = "ECDSA")
         {
             var childKeys = GenerateKeyPair(SecObjectIdentifiers.SecP256r1, algorithm);
 
             var cert = CreateCert(childKeys, issuer.PrivateKey, subject, issuer.Certificate.SubjectDN);
-            return new CertWithPrivateKey(cert, childKeys.Private);
+            return new CertWithPrivateKey(cert, (ECPrivateKeyParameters)childKeys.Private);
         }
 
         private static X509Certificate CreateRootCert(AsymmetricCipherKeyPair childKeys, AsymmetricKeyParameter issuerPrivate, string subject)

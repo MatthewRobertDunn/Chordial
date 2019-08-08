@@ -19,6 +19,7 @@ namespace Hive.Cryptography.Certificates
         public void Generate()
         {
             rootCert = CertPrimitives.CreateRootCertificate();
+            HiveAddress = rootCert.Certificate.GetThumbprint();
             transportCert = CertPrimitives.CreateChildCertificate(rootCert, "CN=Transport", "ECDSA");
             channelCert = CertPrimitives.CreateChildCertificate(rootCert, "CN=Channel", "ECDSA");
             privateCert = CertPrimitives.CreateChildCertificate(rootCert, "CN=Private", "ECDH");
@@ -33,7 +34,7 @@ namespace Hive.Cryptography.Certificates
         }
 
 
-        public byte[] HiveAddress => throw new NotImplementedException();
+        public byte[] HiveAddress { get; private set; }
 
         public CertWithPrivateKey Transport => transportCert;
 
