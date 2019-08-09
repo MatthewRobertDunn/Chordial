@@ -15,11 +15,15 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Swashbuckle.AspNetCore.Swagger;
+using Hive.Cryptography.Primitives;
+using Hive.Overlay.Peer.Crypto;
 
 namespace Hive.Overlay.Peer
 {
     public class Startup
     {
+        public static CertificateStore CertificateStore { get; private set; }
+
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
@@ -40,9 +44,34 @@ namespace Hive.Overlay.Peer
                 c.IncludeXmlComments(filePath);
             });
 
-            services.AddSingleton<ICertificateStore>(Program.CertificateStore);
+            ConfigureCertificateStore(services);
             services.AddSingleton<Func<Uri, IKadmeliaServer>>(uri => new RestClient(uri));
             services.AddSingleton<IRoutingTable, RoutingTable>();
+        }
+
+        public void ConfigureCertificateStore(IServiceCollection services)
+        {
+            CertificateStore = new CertificateStore();
+
+
+            try
+            {
+                CertificateStore.Load();
+                Console.WriteLine($"Certificate store loaded, your Hive ID is {CertificateStore.HiveAddress.ToBase64()}");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Couldn't open certificate store {0}", ex.Message);
+            }
+
+            if (!CertificateStore.IsLoaded)
+            {
+                Console.WriteLine("Certificate store not loaded, generating new keys");
+                CertificateStore.Generate();
+                Console.WriteLine($"Generated, your new Hive ID is {CertificateStore.HiveAddress.ToBase64()}");
+            }
+
+            services.AddSingleton<ICertificateStore>(CertificateStore);
         }
 
 
