@@ -5,7 +5,7 @@
     </assembly>
     <members>
         <member name="M:Hive.Overlay.Peer.Controllers.HiveController.CloseContacts(Hive.Overlay.Peer.Dto.ClosestNodeSearch)">
-            <summary>
+            <summary>   
             Returns a list of nodes closest to the given network address.
             Set 'address' to the hive address you are searching for.
             </summary>

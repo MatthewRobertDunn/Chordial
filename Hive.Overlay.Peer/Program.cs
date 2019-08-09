@@ -11,9 +11,23 @@ namespace Hive.Overlay.Peer
     class Program
     {
         public static CertificateStore CertificateStore { get; private set; }
+
+        public static int Port { get; private set; }
         public static void Main(string[] args)
         {
+            Port = 5000;
+            if (args.Length > 0)
+            {
+
+                if (int.TryParse(args[0], out int port))
+                {
+                    Port = port;
+                }
+
+            }
+
             CertificateStore = new CertificateStore();
+
 
             try
             {

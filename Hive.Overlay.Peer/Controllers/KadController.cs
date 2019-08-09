@@ -13,12 +13,12 @@ namespace Hive.Overlay.Peer.Controllers
     {
         private readonly IKadmeliaServer kadmeliaServer;
 
-        public HiveController(IKadmeliaServer server)
+        public HiveController(IKadmeliaServer kadmeliaServer)
         {
             this.kadmeliaServer = kadmeliaServer;
         }
 
-        /// <summary>
+        /// <summary>   
         /// Returns a list of nodes closest to the given network address.
         /// Set 'address' to the hive address you are searching for.
         /// </summary>
