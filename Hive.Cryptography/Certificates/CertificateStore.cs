@@ -9,43 +9,56 @@ namespace Hive.Cryptography.Certificates
     public class CertificateStore : ICertificateStore
     {
         private CertWithPrivateKey rootCert;
-        private CertWithPrivateKey transportCert;
-        private CertWithPrivateKey channelCert;
-        private CertWithPrivateKey privateCert;
+
+        private const string rootCertDn = "CN=HiveRoot,O=Bitcoin";
+        private const string transportCertDn = "CN=Transport";
+        private const string channelCertDn = "CN=Channel";
+        private const string privateCertDn = "CN=Private";
 
         /// <summary>
         /// Creates a brand new set of hive keys for use.
         /// </summary>
         public void Generate()
         {
-            rootCert = CertPrimitives.CreateRootCertificate();
+            rootCert = CertPrimitives.CreateRootCertificate(rootCertDn);
             HiveAddress = rootCert.Certificate.GetThumbprint();
-            transportCert = CertPrimitives.CreateChildCertificate(rootCert, "CN=Transport", "ECDSA");
-            channelCert = CertPrimitives.CreateChildCertificate(rootCert, "CN=Channel", "ECDSA");
-            privateCert = CertPrimitives.CreateChildCertificate(rootCert, "CN=Private", "ECDH");
-
-            //Todo: Save to disk
+            Transport = CertPrimitives.CreateChildCertificate(rootCert, transportCertDn, "ECDSA");
+            Channel = CertPrimitives.CreateChildCertificate(rootCert, channelCertDn, "ECDSA");
+            Private = CertPrimitives.CreateChildCertificate(rootCert, privateCertDn, "ECDH");
+            Save();
+            IsLoaded = true;
         }
 
-        
-        private bool Save()
+
+        private void Save()
         {
-
+            var store = CertPrimitives.CreateStore(rootCert, Transport, Channel, Private);
+            store.Save();
         }
 
-        public bool Load()
+        public void Load()
         {
-            //todo: load
-            throw new NotImplementedException();
+            var store = CertPrimitives.Load();
+            this.rootCert = store.GetCertPrivate(rootCertDn);
+            HiveAddress = rootCert.Certificate.GetThumbprint();
+
+            Transport = store.GetCertPrivate(transportCertDn);
+            Channel = store.GetCertPrivate(channelCertDn);
+            Private = store.GetCertPrivate(privateCertDn);
+
+            IsLoaded = true;
         }
+
+        public bool IsLoaded { get; private set; }
+
 
 
         public byte[] HiveAddress { get; private set; }
 
-        public CertWithPrivateKey Transport => transportCert;
+        public CertWithPrivateKey Transport { get; private set; }
 
-        public CertWithPrivateKey Channel => channelCert;
+        public CertWithPrivateKey Channel { get; private set; }
 
-        public CertWithPrivateKey Private => privateCert;
+        public CertWithPrivateKey Private { get; private set; }
     }
 }

@@ -40,10 +40,7 @@ namespace Hive.Overlay.Peer
                 c.IncludeXmlComments(filePath);
             });
 
-
-            var certStore = new CertificateStore();
-            certStore.Generate();
-            services.AddSingleton<ICertificateStore>(certStore);
+            services.AddSingleton<ICertificateStore>(Program.CertificateStore);
             services.AddSingleton<Func<Uri, IKadmeliaServer>>(uri => new RestClient(uri));
             services.AddSingleton<IRoutingTable, RoutingTable>();
         }

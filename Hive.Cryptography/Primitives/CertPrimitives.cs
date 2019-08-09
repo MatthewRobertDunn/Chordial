@@ -1,4 +1,5 @@
 ﻿using Hive.Cryptography.Certificates;
+using MS = System.Security.Cryptography.X509Certificates;
 using Org.BouncyCastle.Asn1;
 using Org.BouncyCastle.Asn1.Sec;
 using Org.BouncyCastle.Asn1.X509;
@@ -11,6 +12,7 @@ using Org.BouncyCastle.Security;
 using Org.BouncyCastle.X509;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Text;
 
 namespace Hive.Cryptography.Primitives
@@ -25,27 +27,71 @@ namespace Hive.Cryptography.Primitives
             return bcKpGen.GenerateKeyPair();
         }
 
-        public static Pkcs12Store CreateStore(CertWithPrivateKey root,  IEnumerable<CertWithPrivateKey> certs)
+        public static Pkcs12Store CreateStore(CertWithPrivateKey root, params CertWithPrivateKey[] certs)
         {
             var store = new Pkcs12Store();
 
+            var issuerCertEntry = new X509CertificateEntry(root.Certificate);
+            var rootAlias = root.Certificate.SubjectDN.ToString();
+            store.SetCertificateEntry(rootAlias, issuerCertEntry);
+            store.SetKeyEntry(rootAlias, new AsymmetricKeyEntry(root.PrivateKey), new[] { issuerCertEntry });
+
+
             foreach (var cert in certs)
             {
-                var issuerCertEntry = new X509CertificateEntry(cert.Certificate);
+                var certEntry = new X509CertificateEntry(cert.Certificate);
                 var alias = cert.Certificate.SubjectDN.ToString();
-                store.SetCertificateEntry(alias, issuerCertEntry);
-                store.SetKeyEntry(alias, new AsymmetricKeyEntry(cert.PrivateKey),);
+                store.SetCertificateEntry(alias, certEntry);
+                store.SetKeyEntry(alias, new AsymmetricKeyEntry(cert.PrivateKey), new[] { certEntry, issuerCertEntry });
             }
+
+            return store;
+        }
+
+        public static void Save(this Pkcs12Store store, string password = "password")
+        {
+            var stream = new MemoryStream();
+            store.Save(stream, password.ToCharArray(), new SecureRandom());
+            var folder = AppDomain.CurrentDomain.BaseDirectory;
+            File.WriteAllBytes(Path.Combine(folder, "hiveprivate.pfx"), stream.ToArray());
+        }
+
+        public static CertWithPrivateKey GetCertPrivate(this Pkcs12Store store, string alias)
+        {
+            var cert = store.GetCertificate(alias).Certificate;
+            var priv = store.GetKey(alias).Key;
+            return new CertWithPrivateKey(cert, (ECPrivateKeyParameters)priv);
+        }
+
+        public static Pkcs12Store Load(string password = "password")
+        {
+            Pkcs12Store store = new Pkcs12Store();
+            var folder = AppDomain.CurrentDomain.BaseDirectory;
+            using (var stream = File.OpenRead(Path.Combine(folder, "hiveprivate.pfx")))
+            {
+                store.Load(stream, password.ToCharArray());
+            }
+
+            return store;
+        }
+
+        public static CertWithPrivateKey CreateRootCertificate(string subject)
+        {
+            var issuerKeys = GenerateKeyPair(SecObjectIdentifiers.SecP256r1);
+            var cert = CreateRootCert(issuerKeys, issuerKeys.Private, subject);
+            return new CertWithPrivateKey(cert, (ECPrivateKeyParameters)issuerKeys.Private);
 
         }
 
-
-        public static CertWithPrivateKey CreateRootCertificate()
+        public static MS.X509Certificate2 ToMicrosoftPrivate(this CertWithPrivateKey cert)
         {
-            var issuerKeys = GenerateKeyPair(SecObjectIdentifiers.SecP256r1);
-            var cert = CreateRootCert(issuerKeys, issuerKeys.Private, "CN=HiveRoot, O=Bitcoin");
-            return new CertWithPrivateKey(cert, (ECPrivateKeyParameters)issuerKeys.Private);
+            var store = CreateStore(cert);
+            var stream = new MemoryStream();
+            store.Save(stream, "password".ToCharArray(), new SecureRandom());
 
+            return new MS.X509Certificate2(
+                stream.ToArray(), "password",
+                MS.X509KeyStorageFlags.PersistKeySet | MS.X509KeyStorageFlags.Exportable);
         }
 
         public static byte[] GetThumbprint(this X509Certificate cert)

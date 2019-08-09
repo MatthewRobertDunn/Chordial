@@ -65,7 +65,7 @@ namespace Hive.Overlay.Peer.Crypto
                 new MS.X509Certificates.X509Certificate2(
                     stream.ToArray(), password,
                     MS.X509Certificates.X509KeyStorageFlags.PersistKeySet | MS.X509Certificates.X509KeyStorageFlags.Exportable);
-
+            
             
             var ch = new MS.X509Certificates.X509Chain();
 

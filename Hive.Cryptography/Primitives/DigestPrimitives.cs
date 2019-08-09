@@ -24,5 +24,11 @@ namespace Hive.Cryptography.Primitives
             sha3.DoFinal(derivedKey, 0);
             return derivedKey;
         }
+
+
+        public static string ToBase64(this byte[] source)
+        {
+            return Convert.ToBase64String(source);
+        }
     }
 }

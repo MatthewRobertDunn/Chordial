@@ -13,9 +13,9 @@ namespace Hive.Overlay.Peer.Controllers
     {
         private readonly IKadmeliaServer kadmeliaServer;
 
-        public HiveController()
+        public HiveController(IKadmeliaServer server)
         {
-            //this.kadmeliaServer = kadmeliaServer;
+            this.kadmeliaServer = kadmeliaServer;
         }
 
         /// <summary>
@@ -24,7 +24,7 @@ namespace Hive.Overlay.Peer.Controllers
         /// </summary>
         /// <param name="request"></param>
         /// <returns>A list of nodes closest to the requested address</returns>
-        [HttpPost("/closecontacts/")]
+        [HttpPost("closecontacts/")]
         public Contact[] CloseContacts(ClosestNodeSearch request)
         {
             return this.kadmeliaServer.CloseContacts(request.Address, request.RequestedBy);
@@ -37,7 +37,7 @@ namespace Hive.Overlay.Peer.Controllers
         /// <param name="address"></param>
         /// <param name="request">Base64 encoded string containing the hive address you are searching for</param>
         /// <returns>A list of nodes closest to the requested address</returns>
-        [HttpGet("/closecontacts/")]
+        [HttpGet("closecontacts/")]
         public Contact[] CloseContacts([FromQuery] string address)
         {
             return this.kadmeliaServer.CloseContacts(Convert.FromBase64String(address), null);
@@ -48,13 +48,13 @@ namespace Hive.Overlay.Peer.Controllers
         /// </summary>
         /// <param name="request"></param>
         /// <returns></returns>
-        [HttpPost("/address/")]
+        [HttpPost("address/")]
         public byte[] Address(HiveRequest request)
         {
             return this.kadmeliaServer.Address(request.RequestedBy);
         }
 
-        [HttpGet("/address/")]
+        [HttpGet("address/")]
         public byte[] Address()
         {
             return this.kadmeliaServer.Address();

@@ -1,4 +1,6 @@
-﻿using Hive.Overlay.Peer.Crypto;
+﻿using Hive.Cryptography.Certificates;
+using Hive.Cryptography.Primitives;
+using Hive.Overlay.Peer.Crypto;
 using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
 using System;
@@ -8,9 +10,32 @@ namespace Hive.Overlay.Peer
 {
     class Program
     {
-        private static X509Certificate2 Certificate;
+        public static CertificateStore CertificateStore { get; private set; }
         public static void Main(string[] args)
         {
+            CertificateStore = new CertificateStore();
+
+            try
+            {
+                CertificateStore.Load();
+                Console.WriteLine($"Certificate store loaded, your Hive ID is {CertificateStore.HiveAddress.ToBase64()}");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Couldn't open certificate store {0}", ex.Message);
+            }
+
+            if (!CertificateStore.IsLoaded)
+            {
+                Console.WriteLine("Certificate store not loaded, generating new keys");
+                CertificateStore.Generate();
+                Console.WriteLine($"Generated, your new Hive ID is {CertificateStore.HiveAddress.ToBase64()}");
+            }
+
+
+
+
+
             Console.WriteLine("Hive node starting...");
             Console.WriteLine("Starting web server");
             CreateWebHostBuilder(args).Build().Run();
@@ -24,10 +49,10 @@ namespace Hive.Overlay.Peer
                     options.AddServerHeader = false;
                     options.Listen(System.Net.IPAddress.Any, 5000, configure =>
                      {
-                         configure.UseHttps(Certificate);
+                         configure.UseHttps(CertificateStore.Transport.ToMicrosoftPrivate());
 
                      });
-               })
+                })
                 .UseStartup<Startup>();
         }
     }
