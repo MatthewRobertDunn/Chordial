@@ -35,7 +35,7 @@ namespace Hive.Cryptography
             this.sharedKey = privateKey.GetSharedKey(publicKey);
 
             //nonce for chacha.
-            this.symmetricNonce = this.sharedKey.DeriveKey(nonceKeyDeriveInfoText.ToAsciiBytes(), 12);
+            this.symmetricNonce = this.sharedKey.DeriveKey(nonceKeyDeriveInfoText.ToUTF8Bytes(), 12);
         }
             
         /// <summary>

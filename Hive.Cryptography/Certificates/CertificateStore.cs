@@ -25,12 +25,11 @@ namespace Hive.Cryptography.Certificates
             Transport = CertPrimitives.CreateChildCertificate(rootCert, transportCertDn, "ECDSA");
             Channel = CertPrimitives.CreateChildCertificate(rootCert, channelCertDn, "ECDSA");
             Private = CertPrimitives.CreateChildCertificate(rootCert, privateCertDn, "ECDH");
-            Save();
             IsLoaded = true;
         }
 
 
-        private void Save()
+        public void Save()
         {
             var store = CertPrimitives.CreateStore(rootCert, Transport, Channel, Private);
             store.Save();

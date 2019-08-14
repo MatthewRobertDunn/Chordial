@@ -6,6 +6,10 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Linq;
+using Org.BouncyCastle.Asn1.Ocsp;
+using Org.BouncyCastle.Asn1;
+using Org.BouncyCastle.Security;
+using Org.BouncyCastle.Crypto.Signers;
 
 namespace Hive.Cryptography.Primitives
 {
@@ -58,5 +62,35 @@ namespace Hive.Cryptography.Primitives
             var q = p.Parameters.G.Multiply(p.D);
             return new ECPublicKeyParameters(q, p.Parameters);
         }
+
+
+
+        /// <summary>
+        /// Signs a message with the given private key.
+        /// </summary>
+        /// <param name="p"></param>
+        /// <returns></returns>
+        public static string Sign(this ECPrivateKeyParameters p, string message)
+        {
+            var ecdsa = new DsaDigestSigner(new ECDsaSigner(), new Sha3Digest(256));
+            ecdsa.Init(true, p);
+            var inputBlock = message.ToUTF8Bytes();
+            ecdsa.BlockUpdate(inputBlock, 0, inputBlock.Length);
+            var signature = ecdsa.GenerateSignature();
+            return signature.ToBase64();
+        }
+
+        public static bool VerifySign(this ECPublicKeyParameters p, string message, string signature)
+        {
+            var ecdsa = new DsaDigestSigner(new ECDsaSigner(), new Sha3Digest(256));
+            ecdsa.Init(false, p);
+            var inputBlock = message.ToUTF8Bytes();
+            ecdsa.BlockUpdate(inputBlock, 0, inputBlock.Length);
+            var signaturebytes = signature.FromBase64();
+            return ecdsa.VerifySignature(signaturebytes);
+        }
+
+
+
     }
 }

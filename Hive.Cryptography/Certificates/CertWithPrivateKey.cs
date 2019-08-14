@@ -13,8 +13,11 @@ namespace Hive.Cryptography.Certificates
         {
             this.PrivateKey = privateKey;
             this.Certificate = certificate;
+            this.PublicKey = (ECPublicKeyParameters)this.Certificate.GetPublicKey();
         }
         public ECPrivateKeyParameters PrivateKey { get; }
+
+        public ECPublicKeyParameters PublicKey { get; }
         public X509Certificate Certificate { get; }
     }
 }

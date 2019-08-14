@@ -68,6 +68,7 @@ namespace Hive.Overlay.Peer
             {
                 Console.WriteLine("Certificate store not loaded, generating new keys");
                 CertificateStore.Generate();
+                CertificateStore.Save();
                 Console.WriteLine($"Generated, your new Hive ID is {CertificateStore.HiveAddress.ToBase64()}");
             }
 

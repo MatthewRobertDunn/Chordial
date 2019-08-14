@@ -5,16 +5,32 @@ namespace Hive.Cryptography.Primitives
 {
     public static class TextPrimitives
     {
-        public static string FromUTF8(this byte[] base64Text)
+        public static string FromUTF8(this byte[] data)
         {
-            if (base64Text == null)
+            if (data == null)
                 return null;
-            return UTF8Encoding.Default.GetString(base64Text);
+            return UTF8Encoding.Default.GetString(data);
         }
 
-        public static byte[] ToAsciiBytes(this string data)
+        public static byte[] ToUTF8Bytes(this string data)
         {
-            return ASCIIEncoding.ASCII.GetBytes(data);
+            if (string.IsNullOrEmpty(data))
+                return new byte[0];
+
+            return ASCIIEncoding.UTF8.GetBytes(data);
+        }
+
+        public static string ToBase64(this byte[] source)
+        {
+            return Convert.ToBase64String(source);
+        }
+
+        public static byte[] FromBase64(this string data)
+        {
+            if (string.IsNullOrEmpty(data))
+                return new byte[0];
+
+            return Convert.FromBase64String(data);
         }
     }
 }

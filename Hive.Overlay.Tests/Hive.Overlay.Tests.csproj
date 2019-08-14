@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>netcoreapp2.2</TargetFramework>
@@ -14,6 +14,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Hive.Cryptography\Hive.Cryptography.csproj" />
     <ProjectReference Include="..\Hive.Overlay.Api\Hive.Overlay.Api.csproj" />
     <ProjectReference Include="..\Hive.Overlay.Kademlia\Hive.Overlay.Kademlia.csproj" />
   </ItemGroup>
