@@ -70,9 +70,9 @@ namespace Hive.Cryptography.Primitives
         /// </summary>
         /// <param name="p"></param>
         /// <returns></returns>
-        public static string Sign(this ECPrivateKeyParameters p, string message)
+        public static string Sign(this Ed448PrivateKeyParameters p, string message)
         {
-            var ecdsa = new DsaDigestSigner(new ECDsaSigner(), new Sha3Digest(256));
+            var ecdsa = new Ed448Signer(new byte[0]);
             ecdsa.Init(true, p);
             var inputBlock = message.ToUTF8Bytes();
             ecdsa.BlockUpdate(inputBlock, 0, inputBlock.Length);
@@ -80,17 +80,14 @@ namespace Hive.Cryptography.Primitives
             return signature.ToBase64();
         }
 
-        public static bool VerifySign(this ECPublicKeyParameters p, string message, string signature)
+        public static bool VerifySign(this Ed448PublicKeyParameters p, string message, string signature)
         {
-            var ecdsa = new DsaDigestSigner(new ECDsaSigner(), new Sha3Digest(256));
+            var ecdsa = new Ed448Signer(new byte[0]);
             ecdsa.Init(false, p);
             var inputBlock = message.ToUTF8Bytes();
             ecdsa.BlockUpdate(inputBlock, 0, inputBlock.Length);
             var signaturebytes = signature.FromBase64();
             return ecdsa.VerifySignature(signaturebytes);
         }
-
-
-
     }
 }

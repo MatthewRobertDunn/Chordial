@@ -14,6 +14,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
+using Org.BouncyCastle.Crypto.Generators;
 
 namespace Hive.Cryptography.Primitives
 {
@@ -25,6 +26,13 @@ namespace Hive.Cryptography.Primitives
             IAsymmetricCipherKeyPairGenerator bcKpGen = GeneratorUtilities.GetKeyPairGenerator(algorithm);
             bcKpGen.Init(new ECKeyGenerationParameters(sec, new SecureRandom()));
             return bcKpGen.GenerateKeyPair();
+        }
+
+        private static AsymmetricCipherKeyPair GenerateSigningKeypair()
+        {
+            var keyGen = new Ed448KeyPairGenerator();
+            keyGen.Init(new Ed448KeyGenerationParameters(new SecureRandom()));
+            return keyGen.GenerateKeyPair();
         }
 
         public static Pkcs12Store CreateStore(CertWithPrivateKey root, params CertWithPrivateKey[] certs)
@@ -60,7 +68,7 @@ namespace Hive.Cryptography.Primitives
         {
             var cert = store.GetCertificate(alias).Certificate;
             var priv = store.GetKey(alias).Key;
-            return new CertWithPrivateKey(cert, (ECPrivateKeyParameters)priv);
+            return new CertWithPrivateKey(cert, priv);
         }
 
         public static Pkcs12Store Load(string password = "password")
@@ -98,6 +106,13 @@ namespace Hive.Cryptography.Primitives
         {
             var pub = (ECPublicKeyParameters)cert.GetPublicKey();
             return pub.Q.GetEncoded().SHAThree256();
+        }
+
+        public static CertWithPrivateKey CreateSigningCertificate(CertWithPrivateKey issuer, string subject)
+        {
+            var childKeys = GenerateSigningKeypair();
+            var cert = CreateCert(childKeys, issuer.PrivateKey, subject, issuer.Certificate.SubjectDN);
+            return new CertWithPrivateKey(cert, childKeys.Private);
         }
 
         public static CertWithPrivateKey CreateChildCertificate(CertWithPrivateKey issuer, string subject, string algorithm = "ECDSA")

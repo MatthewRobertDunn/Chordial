@@ -1,6 +1,7 @@
 ﻿using Hive.Cryptography.Certificates;
 using Hive.Cryptography.Primitives;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Org.BouncyCastle.Crypto.Parameters;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -15,12 +16,15 @@ namespace Hive.Overlay.Tests
         {
             var store = new CertificateStore();
             store.Generate();
+            var privateKey = (Ed448PrivateKeyParameters)store.Channel.PrivateKey;
+            var publicKey = (Ed448PublicKeyParameters)store.Channel.PublicKey;
 
-            var signature = store.Channel.PrivateKey.Sign("Hello");
-            var isValid = store.Channel.PublicKey.VerifySign("Hello", signature);
+
+            var signature = privateKey.Sign("Hello");
+            var isValid = publicKey.VerifySign("Hello", signature);
             Assert.IsTrue(isValid);
 
-            var isInvalid = store.Channel.PublicKey.VerifySign("Stuiff", signature);
+            var isInvalid = publicKey.VerifySign("Stuiff", signature);
             Assert.IsFalse(isInvalid);
         }
     }

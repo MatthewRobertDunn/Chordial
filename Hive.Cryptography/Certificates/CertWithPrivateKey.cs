@@ -9,15 +9,15 @@ namespace Hive.Cryptography.Certificates
 {
     public class CertWithPrivateKey
     {
-        public CertWithPrivateKey(X509Certificate certificate, ECPrivateKeyParameters privateKey)
+        public CertWithPrivateKey(X509Certificate certificate, AsymmetricKeyParameter privateKey)
         {
             this.PrivateKey = privateKey;
             this.Certificate = certificate;
-            this.PublicKey = (ECPublicKeyParameters)this.Certificate.GetPublicKey();
+            this.PublicKey = (AsymmetricKeyParameter)this.Certificate.GetPublicKey();
         }
-        public ECPrivateKeyParameters PrivateKey { get; }
+        public AsymmetricKeyParameter PrivateKey { get; }
 
-        public ECPublicKeyParameters PublicKey { get; }
+        public AsymmetricKeyParameter PublicKey { get; }
         public X509Certificate Certificate { get; }
     }
 }

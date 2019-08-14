@@ -23,7 +23,7 @@ namespace Hive.Cryptography.Certificates
             rootCert = CertPrimitives.CreateRootCertificate(rootCertDn);
             HiveAddress = rootCert.Certificate.GetThumbprint();
             Transport = CertPrimitives.CreateChildCertificate(rootCert, transportCertDn, "ECDSA");
-            Channel = CertPrimitives.CreateChildCertificate(rootCert, channelCertDn, "ECDSA");
+            Channel = CertPrimitives.CreateSigningCertificate(rootCert, channelCertDn);
             Private = CertPrimitives.CreateChildCertificate(rootCert, privateCertDn, "ECDH");
             IsLoaded = true;
         }
