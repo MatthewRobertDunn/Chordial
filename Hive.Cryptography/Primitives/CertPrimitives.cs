@@ -56,12 +56,37 @@ namespace Hive.Cryptography.Primitives
             return store;
         }
 
+        public static Pkcs12Store CreatePublicStore(X509Certificate root, params X509Certificate[] certs)
+        {
+            var store = new Pkcs12Store();
+
+            var issuerCertEntry = new X509CertificateEntry(root);
+            var rootAlias = root.SubjectDN.ToString();
+            store.SetCertificateEntry(rootAlias, issuerCertEntry);
+
+            foreach (var cert in certs)
+            {
+                var certEntry = new X509CertificateEntry(cert);
+                var alias = cert.SubjectDN.ToString();
+                store.SetCertificateEntry(alias, certEntry);
+            }
+
+            return store;
+        }
+
         public static void Save(this Pkcs12Store store, string password = "password")
         {
             var stream = new MemoryStream();
             store.Save(stream, password.ToCharArray(), new SecureRandom());
             var folder = AppDomain.CurrentDomain.BaseDirectory;
             File.WriteAllBytes(Path.Combine(folder, "hiveprivate.pfx"), stream.ToArray());
+        }
+
+        public static byte[] GetBytes(this Pkcs12Store store, string password = "password")
+        {
+            var stream = new MemoryStream();
+            store.Save(stream, password.ToCharArray(), new SecureRandom());
+            return stream.ToArray();
         }
 
         public static CertWithPrivateKey GetCertPrivate(this Pkcs12Store store, string alias)

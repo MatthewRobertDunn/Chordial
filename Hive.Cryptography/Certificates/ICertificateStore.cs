@@ -27,5 +27,7 @@ namespace Hive.Cryptography.Certificates
         /// Provides access to the key intended for private messages.
         /// </summary>
         CertWithPrivateKey Private { get; }
+
+        byte[] ToPublicPfxBytes();
     }
 }

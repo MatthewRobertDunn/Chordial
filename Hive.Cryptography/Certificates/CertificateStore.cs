@@ -48,6 +48,13 @@ namespace Hive.Cryptography.Certificates
             IsLoaded = true;
         }
 
+
+        public byte[] ToPublicPfxBytes()
+        {
+            var store = CertPrimitives.CreatePublicStore(rootCert.Certificate, Transport.Certificate, Channel.Certificate, Private.Certificate);
+            return store.GetBytes();
+        }
+
         public bool IsLoaded { get; private set; }
 
         public byte[] HiveAddress { get; private set; }

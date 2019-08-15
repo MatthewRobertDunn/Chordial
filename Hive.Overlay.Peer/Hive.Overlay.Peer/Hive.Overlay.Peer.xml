@@ -4,6 +4,12 @@
         <name>Hive.Overlay.Peer</name>
     </assembly>
     <members>
+        <member name="M:Hive.Overlay.Peer.Controllers.CertificateController.Pfx(System.String)">
+            <summary>
+            Returns public keys for this node in the pfx format.
+            Password for the file is 'password'
+            </summary>
+        </member>
         <member name="M:Hive.Overlay.Peer.Controllers.RouteController.CloseContacts(Hive.Overlay.Peer.Dto.ClosestNodeSearch)">
             <summary>   
             Returns a list of nodes closest to the given network address.
