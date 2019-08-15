@@ -17,6 +17,7 @@ using Microsoft.Extensions.Options;
 using Swashbuckle.AspNetCore.Swagger;
 using Hive.Cryptography.Primitives;
 using Hive.Overlay.Peer.Crypto;
+using Hive.Overlay.Kademlia.Network;
 
 namespace Hive.Overlay.Peer
 {
@@ -45,11 +46,21 @@ namespace Hive.Overlay.Peer
             });
 
             ConfigureCertificateStore(services);
+            ConfigureMyAddress(services);
             services.AddSingleton<Func<Uri, IKadmeliaServer>>(uri => new RestClient(uri));
             services.AddSingleton<IRoutingTable, RoutingTable>();
+            services.AddSingleton<IKadmeliaServer, KademliaServer>();
         }
 
-        public void ConfigureCertificateStore(IServiceCollection services)
+        private void ConfigureMyAddress(IServiceCollection services)
+        {
+            var kadId = new KadId(CertificateStore.HiveAddress);
+            var myUrl = new Uri($"http://{IpUtils.GetExternalIp()}:{Program.Port}/");
+            var myself = new NetworkContact(kadId, new[] { myUrl });
+            services.AddSingleton<NetworkContact>(myself);
+        }
+
+        private void ConfigureCertificateStore(IServiceCollection services)
         {
             CertificateStore = new CertificateStore();
 

@@ -35,7 +35,7 @@ namespace Hive.Overlay.Peer
                 .UseKestrel(options =>
                 {
                     options.AddServerHeader = false;
-                    options.Listen(System.Net.IPAddress.Any, 5000, configure =>
+                    options.Listen(System.Net.IPAddress.Any, Program.Port, configure =>
                      {
                          configure.UseHttps(Startup.CertificateStore.Transport.ToMicrosoftPrivate());
 

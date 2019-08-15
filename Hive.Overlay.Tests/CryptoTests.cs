@@ -27,5 +27,21 @@ namespace Hive.Overlay.Tests
             var isInvalid = publicKey.VerifySign("Stuiff", signature);
             Assert.IsFalse(isInvalid);
         }
+
+        [TestMethod]
+        public void SaveLoadCerts()
+        {
+            var store = new CertificateStore();
+            store.Generate();
+            store.Save();
+
+            store = new CertificateStore();
+            store.Load();
+
+            Assert.IsNotNull(store.Transport);
+            Assert.IsNotNull(store.Channel);
+            Assert.IsNotNull(store.Private);
+
+        }
     }
 }
