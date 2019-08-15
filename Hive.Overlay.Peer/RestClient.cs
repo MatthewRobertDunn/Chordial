@@ -13,7 +13,7 @@ namespace Hive.Overlay.Peer
         private Uri baseUri;
         public RestClient(Uri remoteAddress)
         {
-            this.baseUri = new Uri(remoteAddress, "/v1/hive/");
+            this.baseUri = new Uri(remoteAddress, "/hive/v1/route");
         }
 
         public byte[] Address(Contact senderId = null)

@@ -50,8 +50,6 @@ namespace Hive.Cryptography.Certificates
 
         public bool IsLoaded { get; private set; }
 
-
-
         public byte[] HiveAddress { get; private set; }
 
         public CertWithPrivateKey Transport { get; private set; }

@@ -7,13 +7,13 @@ using System.Text;
 
 namespace Hive.Overlay.Peer.Controllers
 {
-    [Route("v1/[controller]")]
+    [Route("hive/v1/[controller]")]
     [ApiController]
-    public class HiveController : ControllerBase
+    public class RouteController : ControllerBase
     {
         private readonly IKadmeliaServer kadmeliaServer;
 
-        public HiveController(IKadmeliaServer kadmeliaServer)
+        public RouteController(IKadmeliaServer kadmeliaServer)
         {
             this.kadmeliaServer = kadmeliaServer;
         }
