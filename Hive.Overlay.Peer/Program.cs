@@ -2,8 +2,11 @@
 using Hive.Cryptography.Primitives;
 using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
+using Open.Nat;
 using System;
 using System.Security.Cryptography.X509Certificates;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Hive.Overlay.Peer
 {
@@ -25,6 +28,9 @@ namespace Hive.Overlay.Peer
 
 
             Console.WriteLine("Hive node starting...");
+            Console.WriteLine("Forwarding port");
+            PortForward();
+
             Console.WriteLine("Starting web server");
             CreateWebHostBuilder(args).Build().Run();
         }
@@ -42,6 +48,15 @@ namespace Hive.Overlay.Peer
                      });
                 })
                 .UseStartup<Startup>();
+        }
+
+        public static async Task PortForward()
+        {
+            var discoverer = new NatDiscoverer();
+            var cts = new CancellationTokenSource(10000);
+            var device = await discoverer.DiscoverDeviceAsync(PortMapper.Upnp, cts);
+
+            await device.CreatePortMapAsync(new Mapping(Protocol.Tcp, Program.Port, Program.Port, "The mapping name"));
         }
     }
 }
