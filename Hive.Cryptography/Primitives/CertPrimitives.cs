@@ -74,7 +74,7 @@ namespace Hive.Cryptography.Primitives
             return store;
         }
 
-        public static void Save(this Pkcs12Store store, string password = "password")
+        public static void Save(this Pkcs12Store store, string password = "")
         {
             var stream = new MemoryStream();
             store.Save(stream, password.ToCharArray(), new SecureRandom());
@@ -82,7 +82,7 @@ namespace Hive.Cryptography.Primitives
             File.WriteAllBytes(Path.Combine(folder, "hiveprivate.pfx"), stream.ToArray());
         }
 
-        public static byte[] GetBytes(this Pkcs12Store store, string password = "password")
+        public static byte[] GetBytes(this Pkcs12Store store, string password = "")
         {
             var stream = new MemoryStream();
             store.Save(stream, password.ToCharArray(), new SecureRandom());
@@ -96,7 +96,7 @@ namespace Hive.Cryptography.Primitives
             return new CertWithPrivateKey(cert, priv);
         }
 
-        public static Pkcs12Store Load(string password = "password")
+        public static Pkcs12Store Load(string password = "")
         {
             Pkcs12Store store = new Pkcs12Store();
             var folder = AppDomain.CurrentDomain.BaseDirectory;

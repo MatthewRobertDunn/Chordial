@@ -52,7 +52,7 @@ namespace Hive.Cryptography.Certificates
         public byte[] ToPublicPfxBytes()
         {
             var store = CertPrimitives.CreatePublicStore(rootCert.Certificate, Transport.Certificate, Channel.Certificate, Private.Certificate);
-            return store.GetBytes();
+            return store.GetBytes(string.Empty);
         }
 
         public bool IsLoaded { get; private set; }
