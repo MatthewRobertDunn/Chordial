@@ -4,7 +4,7 @@
         <name>Hive.Overlay.Peer</name>
     </assembly>
     <members>
-        <member name="M:Hive.Overlay.Peer.Controllers.CertificateController.Pfx(System.String)">
+        <member name="M:Hive.Overlay.Peer.Controllers.CertificateController.Pfx">
             <summary>
             Returns public keys for this node in the pfx format.
             Password for the file is 'password'

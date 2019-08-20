@@ -13,7 +13,6 @@ namespace Hive.Overlay.Kademlia
         private const int PARALELLISM = 3; // Number of requests to run at once for iterative operations.
         private const int NODES_TO_FIND = 20; // = k = bucket size
 
-
         // Network State
         private IRoutingTable routingTable;
 
@@ -46,11 +45,18 @@ namespace Hive.Overlay.Kademlia
                 var remotePeerUri = new Uri(uri);
                 var bootstrapPeer = serverFactory(remotePeerUri);
 
-                //Get the remote peers ID, pass it my own contact details
-                var remotePeerID = bootstrapPeer.Address(myself.ToContact());
-                //Add this peer to my routing table if alive
-                if (remotePeerID != null)
-                    routingTable.AddContact(NetworkContact.Parse(remotePeerID, new[] { uri }));
+                try
+                {
+                    //Get the remote peers ID, pass it my own contact details
+                    var remotePeerID = bootstrapPeer.Address(myself.ToContact());
+                    //Add this peer to my routing table if alive
+                    if (remotePeerID != null)
+                        routingTable.AddContact(NetworkContact.Parse(remotePeerID, new[] { uri }));
+                }
+                catch (Exception ex)
+                {
+                    Log($"Could not contact bootstrap peer {remotePeerUri} {ex}");
+                }
             }
 
             //Perform an iterative search for myself, this will populate my routing table further

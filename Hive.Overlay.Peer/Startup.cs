@@ -18,6 +18,9 @@ using Swashbuckle.AspNetCore.Swagger;
 using Hive.Cryptography.Primitives;
 using Hive.Overlay.Peer.Crypto;
 using Hive.Overlay.Kademlia.Network;
+using Hive.Overlay.Peer.Settings;
+using Microsoft.Extensions.Hosting;
+using Hive.Overlay.Peer.Tasks;
 
 namespace Hive.Overlay.Peer
 {
@@ -45,19 +48,37 @@ namespace Hive.Overlay.Peer
                 c.IncludeXmlComments(filePath);
             });
 
+            ConfigureSettings(services);
             ConfigureCertificateStore(services);
             ConfigureMyAddress(services);
-            services.AddSingleton<Func<Uri, IKadmeliaServer>>(uri => new RestClient(uri));
+
             services.AddSingleton<IRoutingTable, RoutingTable>();
             services.AddSingleton<IKadmeliaServer, KademliaServer>();
+
+            //rest client proxy
+            Func<Uri, IKadmeliaServer> serverFactory = uri => new RestClient(uri);
+            services.AddSingleton(serverFactory);
+
+            services.AddSingleton<IKademilaClient, KademliaClient>();
+
+            //background tasks
+            services.AddSingleton<IHostedService, BootsrapPeer>();
+        }
+
+        private void ConfigureSettings(IServiceCollection services)
+        {
+            var peerSetting = Configuration.GetSection("Peer").Get<PeerSettings>();
+            services.AddSingleton(peerSetting);
         }
 
         private void ConfigureMyAddress(IServiceCollection services)
         {
+            //network contact for local server instance
             var kadId = new KadId(CertificateStore.HiveAddress);
             var myUrl = new Uri($"http://{IpUtils.GetExternalIp()}:{Program.Port}/");
             var myself = new NetworkContact(kadId, new[] { myUrl });
-            services.AddSingleton<NetworkContact>(myself);
+            services.AddSingleton(myself);
+            
         }
 
         private void ConfigureCertificateStore(IServiceCollection services)
@@ -88,7 +109,7 @@ namespace Hive.Overlay.Peer
 
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env)
+        public void Configure(IApplicationBuilder app, Microsoft.AspNetCore.Hosting.IHostingEnvironment env)
         {
             if (env.IsDevelopment())
             {

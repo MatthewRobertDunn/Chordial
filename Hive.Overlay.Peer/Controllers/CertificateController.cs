@@ -25,7 +25,7 @@ namespace Hive.Overlay.Peer.Controllers
         /// Password for the file is 'password'
         /// </summary>
         [HttpGet("pfx/")]
-        public FileResult Pfx([FromQuery] string address)
+        public FileResult Pfx()
         {
            return File(CertificateStore.ToPublicPfxBytes(), "application/x-pkcs12");
         }
