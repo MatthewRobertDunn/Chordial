@@ -11,6 +11,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Hive.Cryptography\Hive.Cryptography.csproj" />
+    <ProjectReference Include="..\Hive.Overlay.Api\Hive.Overlay.Api.csproj" />
   </ItemGroup>
 
 </Project>

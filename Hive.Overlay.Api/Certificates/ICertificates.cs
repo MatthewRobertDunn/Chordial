@@ -4,6 +4,9 @@ using System.Text;
 
 namespace Hive.Overlay.Api.Certificates
 {
+    /// <summary>
+    /// Public interface for a node's certificate interface
+    /// </summary>
     public interface ICertificates
     {
         /// <summary>

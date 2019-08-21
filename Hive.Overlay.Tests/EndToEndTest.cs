@@ -8,7 +8,6 @@ using Ninject;
 using Ninject.Parameters;
 using Hive.Overlay.Kademlia.Network;
 using Hive.Overlay.Kademlia;
-using Hive.Overlay.Kademlia.Storage;
 using Hive.Overlay.Api;
 
 namespace Hive.Overlay.Tests
