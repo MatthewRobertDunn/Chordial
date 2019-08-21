@@ -8,7 +8,7 @@ using System.Text;
 
 namespace Hive.Storage.Certificates
 {
-    public class CertificateRepository
+    public class CertificateRepository : ICertificateRepository
     {
         private const int ExpireDays = 365;
         private const int GraceDays = 30;
@@ -41,7 +41,7 @@ namespace Hive.Storage.Certificates
             else
             {
                 //Update last access
-                document.LastRequested = DateTime.UtcNow;
+                document.LastReplicated = DateTime.UtcNow;
             }
 
             //save in litedb

@@ -21,6 +21,8 @@ using Hive.Overlay.Kademlia.Network;
 using Hive.Overlay.Peer.Settings;
 using Microsoft.Extensions.Hosting;
 using Hive.Overlay.Peer.Tasks;
+using LiteDB;
+using Hive.Storage.Certificates;
 
 namespace Hive.Overlay.Peer
 {
@@ -61,8 +63,14 @@ namespace Hive.Overlay.Peer
 
             services.AddSingleton<IKademilaClient, KademliaClient>();
 
+            //database
+            services.AddSingleton<LiteDatabase>(new LiteDatabase(@"Hive.db"));
+
+            services.AddSingleton<ICertificateRepository, CertificateRepository>();
+
             //background tasks
             services.AddSingleton<IHostedService, BootsrapPeer>();
+            services.AddSingleton<IHostedService, CertificateReplication>();
         }
 
         private void ConfigureSettings(IServiceCollection services)
