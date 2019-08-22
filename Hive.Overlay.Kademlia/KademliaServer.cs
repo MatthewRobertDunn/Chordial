@@ -1,4 +1,6 @@
 ﻿using Hive.Overlay.Api;
+using Hive.Cryptography.Primitives;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Diagnostics;
 using System.Linq;
@@ -9,14 +11,18 @@ namespace Hive.Overlay.Kademlia
     {
         // Network State
         private readonly IRoutingTable routingTable;
+        private readonly ILogger<KademliaServer> log;
         private readonly TimeSpan allowedClockSkew = new TimeSpan(0, 30, 0);
-        public KademliaServer(IRoutingTable routingTable)
+        public KademliaServer(IRoutingTable routingTable,  ILogger<KademliaServer> log)
         {
             this.routingTable = routingTable;
+            this.log = log;
+            log.LogInformation("KademliaServer starting");
         }
 
         public Contact[] CloseContacts(byte[] key, Contact senderId)
         {
+            log.LogInformation($"Close contacts for {key?.ToBase64()} requested by {senderId?.ToString()}");
             if (senderId != null)
                 routingTable.AddContact(NetworkContact.Parse(senderId));
 
@@ -26,20 +32,11 @@ namespace Hive.Overlay.Kademlia
 
         public byte[] Address(Contact senderId)
         {
-            Log("I was pinged!");
+            log.LogInformation($"My address was requested by {senderId?.ToString()}");
             if (senderId != null)
                 routingTable.AddContact(NetworkContact.Parse(senderId));
 
             return this.routingTable.MySelf.Address.Data;
-        }
-
-        /// <summary>
-        /// Log debug messages, if debugging is enabled.
-        /// </summary>
-        /// <param name="message"></param>
-        private void Log(string message)
-        {
-            Trace.WriteLine(message);
         }
 
     }

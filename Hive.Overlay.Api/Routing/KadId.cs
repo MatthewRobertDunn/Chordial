@@ -266,7 +266,7 @@ namespace Hive.Overlay.Kademlia
         /// <returns></returns>
         public override string ToString()
         {
-            return BitConverter.ToString(Data);
+            return Convert.ToBase64String(Data);
         }
 
         /// <summary>

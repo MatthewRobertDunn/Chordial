@@ -1,4 +1,5 @@
 ﻿using Hive.Overlay.Api;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -19,13 +20,15 @@ namespace Hive.Overlay.Kademlia
 
         private readonly List<List<NetworkContact>> buckets;
         private Func<Uri, IKadmeliaServer> serverFactory;
+        private readonly ILogger<RoutingTable> log;
+
         public NetworkContact MySelf { get; }
 
         /// <summary>
         /// Make a new bucket list, for holding node contacts.
         /// </summary>
         /// <param name="mySelf">The ID to center the list on.</param>
-        public RoutingTable(NetworkContact mySelf, Func<Uri, IKadmeliaServer> serverFactory)
+        public RoutingTable(NetworkContact mySelf, Func<Uri, IKadmeliaServer> serverFactory, ILogger<RoutingTable> log)
         {
             this.MySelf = mySelf;
             buckets = new List<List<NetworkContact>>(NUM_BUCKETS);
@@ -36,6 +39,9 @@ namespace Hive.Overlay.Kademlia
                 buckets.Add(new List<NetworkContact>(BUCKET_SIZE));
             }
             this.serverFactory = serverFactory;
+            this.log = log;
+
+            log.LogInformation("RoutingTable starting");
         }
 
 
@@ -76,7 +82,7 @@ namespace Hive.Overlay.Kademlia
         /// </summary>
         /// <param name="toAdd"></param>
         [MethodImpl(MethodImplOptions.Synchronized)]
-        public void Put(NetworkContact toAdd)
+        private void Put(NetworkContact toAdd)
         {
             if (toAdd == null)
             {
@@ -85,6 +91,8 @@ namespace Hive.Overlay.Kademlia
 
             int bucket = BucketFor(toAdd.Address);
             buckets[bucket].Add(toAdd); // No lock: people can read while we do this.
+
+            log.LogInformation($"Added {toAdd} to routing table in bucket {toAdd}");
         }
 
         /// <summary>
@@ -134,6 +142,7 @@ namespace Hive.Overlay.Kademlia
             int bucket = BucketFor(toPromote);
             buckets[bucket].Remove(promotee); // Take out
             buckets[bucket].Add(promotee); // And put in at end
+            log.LogInformation($"Promoted {toPromote}");
         }
 
         /// <summary>
@@ -152,6 +161,8 @@ namespace Hive.Overlay.Kademlia
                     return;
                 }
             }
+
+            log.LogInformation($"Removed {toRemove}");
         }
 
 
@@ -210,7 +221,9 @@ namespace Hive.Overlay.Kademlia
                     {
                         // If the blocker doesn't respond, pick the applicant.
                         if (!x.Result)
+                        {
                             ReplaceBlocker(applicant, blocker);
+                        }
                     }
                 );
         }
@@ -220,21 +233,24 @@ namespace Hive.Overlay.Kademlia
         {
             Remove(blocker.Address);
             Put(applicant);
+            log.LogInformation($"Replaced blocker {blocker} with applicant {applicant}");
         }
 
         private bool PingBlocker(NetworkContact blocker)
         {
+            log.LogInformation($"Pinging blocker {blocker}");
             // We can't fit them. We have to choose between blocker and applicant
             var remotePeerUri = blocker.UriDefault;
             try
             {
                 var peer = serverFactory(remotePeerUri);
                 var pingResult = peer.Address(MySelf.ToContact());
+                log.LogInformation($"Blocker {blocker} ping success");
                 return pingResult.Length == KadId.ID_LENGTH;
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Trace.TraceError("Could not contact peer {0} {1}", remotePeerUri, ex.Message);
+                log.LogInformation($"Could not ping blocker {blocker} {ex.Message}");
                 return false;
             }
         }

@@ -1,4 +1,6 @@
-﻿using Hive.Overlay.Api;
+﻿using Hive.Cryptography.Primitives;
+using Hive.Overlay.Api;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -17,6 +19,8 @@ namespace Hive.Overlay.Kademlia
         private IRoutingTable routingTable;
 
         private Func<Uri, IKadmeliaServer> serverFactory;
+        private readonly ILogger<KademliaClient> log;
+
         //Whoami
         private NetworkContact myself;
 
@@ -24,11 +28,13 @@ namespace Hive.Overlay.Kademlia
         /// Make a node on a specific port, with a specified ID
         /// </summary>
         /// <param name="port"></param>
-        public KademliaClient(IRoutingTable cache, Func<Uri, IKadmeliaServer> serverFactory)
+        public KademliaClient(IRoutingTable cache, Func<Uri, IKadmeliaServer> serverFactory, ILogger<KademliaClient> log)
         {
             this.routingTable = cache;
             this.serverFactory = serverFactory;
+            this.log = log;
             myself = cache.MySelf;
+            log.LogInformation("KademliaClient starting");
         }
 
         /// <summary>
@@ -38,10 +44,12 @@ namespace Hive.Overlay.Kademlia
         /// <returns></returns>
         public bool Booststrap(IList<string> bootstrapPeerUris)
         {
+            log.LogInformation($"Bootstraping with {bootstrapPeerUris.Count} uris");
 
             //Ping as many remote peers as we can and if they're alive add them to our rating table
             foreach (var uri in bootstrapPeerUris)
             {
+                log.LogInformation($"Contacting peer {uri}");
                 var remotePeerUri = new Uri(uri);
                 var bootstrapPeer = serverFactory(remotePeerUri);
 
@@ -51,11 +59,15 @@ namespace Hive.Overlay.Kademlia
                     var remotePeerID = bootstrapPeer.Address(myself.ToContact());
                     //Add this peer to my routing table if alive
                     if (remotePeerID != null)
-                        routingTable.AddContact(NetworkContact.Parse(remotePeerID, new[] { uri }));
+                    {
+                        var newContact = NetworkContact.Parse(remotePeerID, new[] { uri });
+                        log.LogInformation($"Got address {newContact}");
+                        routingTable.AddContact(newContact);
+                    }
                 }
                 catch (Exception ex)
                 {
-                    Log($"Could not contact bootstrap peer {remotePeerUri} {ex}");
+                    log.LogError(ex, $"Could not contact bootstrap peer {remotePeerUri}");
                 }
             }
 
@@ -71,6 +83,7 @@ namespace Hive.Overlay.Kademlia
         /// <returns></returns>
         private IterativeFindResult IterativeFindNode(KadId target)
         {
+            log.LogInformation($"Performing iterative find for {target}");
             return IterativeFind(target);
         }
 
@@ -93,27 +106,32 @@ namespace Hive.Overlay.Kademlia
             foreach (NetworkContact c in routingTable.CloseContacts(20, target))
                 shortlist.Add(c.Address ^ target, new HaveAsked() { Contact = c, Asked = false });
 
+            log.LogInformation($"Shortlist contains {shortlist.Count} nodes to ask");
+
             // Until we run out of people to ask or we're done...
             bool peersLeftToAsk = true;
             while (peersLeftToAsk)
             {
+                result.NumberIterations += 1;
+
                 var closestPeerNotAsked = shortlist.Where(x => x.Value.Contact.Address != myself.Address && !x.Value.IsNotContactable)  //Don't ask myself, ignore not contactable nodes
                                                         .Take(3)    //only consider the first 3 closest nodes
                                                         .Where(x => x.Value.Asked == false) //That we haven't asked before
                                                         .FirstOrDefault(); //Get the first
                 if (closestPeerNotAsked.Value == null)
                 {
+                    log.LogInformation("No peers left to ask");
                     peersLeftToAsk = false;
                     continue;
                 }
 
-                result.NumberIterations += 1;
-
+                var remotePeer = closestPeerNotAsked.Value.Contact;
 
                 closestPeerNotAsked.Value.Asked = true;
                 var remotePeerUri = closestPeerNotAsked.Value.Contact.UriDefault;
 
                 Contact[] searchResults = null;
+                log.LogInformation($"Asking peer {remotePeer} for close contacts");
                 try
                 {
                     var peer = serverFactory(remotePeerUri);
@@ -121,7 +139,7 @@ namespace Hive.Overlay.Kademlia
                 }
                 catch (Exception ex)
                 {
-                    System.Diagnostics.Trace.TraceError("Could not contact peer {0} {1}", remotePeerUri, ex.Message);
+                    log.LogError(ex, $"Could not contact peer {remotePeer}");
                     closestPeerNotAsked.Value.IsNotContactable = true;
                     //If we can't contact this peer, why have them in our routing table?
                     routingTable.Remove(closestPeerNotAsked.Key);

@@ -1,10 +1,9 @@
-﻿using Hive.Cryptography.Certificates;
-using Hive.Cryptography.Primitives;
+﻿using Hive.Cryptography.Primitives;
 using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.Logging;
 using Open.Nat;
 using System;
-using System.Security.Cryptography.X509Certificates;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -47,6 +46,13 @@ namespace Hive.Overlay.Peer
 
                      });
                 })
+                .ConfigureLogging((hostingContext, logging) =>
+                    {
+                        // Requires `using Microsoft.Extensions.Logging;`
+                        logging.AddConfiguration(hostingContext.Configuration.GetSection("Logging"));
+                        logging.AddConsole();
+                        logging.AddDebug();
+                    })
                 .UseStartup<Startup>();
         }
 

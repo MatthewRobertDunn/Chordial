@@ -66,5 +66,10 @@ namespace Hive.Overlay.Kademlia
                 Uri = this.Uri.Select(x => x.ToString()).ToArray()
             };
         }
+
+        public override string ToString()
+        {
+            return this.ToContact().ToString();
+        }
     }
 }

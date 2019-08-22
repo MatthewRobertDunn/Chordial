@@ -1,6 +1,7 @@
 ﻿using Hive.Overlay.Api;
 using Hive.Overlay.Peer.Dto;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -12,10 +13,13 @@ namespace Hive.Overlay.Peer.Controllers
     public class RouteController : ControllerBase
     {
         private readonly IKadmeliaServer kadmeliaServer;
+        private readonly ILogger<RouteController> log;
 
-        public RouteController(IKadmeliaServer kadmeliaServer)
+        public RouteController(IKadmeliaServer kadmeliaServer, ILogger<RouteController> log)
         {
             this.kadmeliaServer = kadmeliaServer;
+            this.log = log;
+            log.LogInformation("Route controller starting");
         }
 
         /// <summary>   
@@ -44,7 +48,7 @@ namespace Hive.Overlay.Peer.Controllers
         }
 
         /// <summary>
-        /// 
+        /// Returns the hiveid of this node
         /// </summary>
         /// <param name="request"></param>
         /// <returns></returns>
@@ -54,6 +58,10 @@ namespace Hive.Overlay.Peer.Controllers
             return this.kadmeliaServer.Address(request.RequestedBy);
         }
 
+        /// <summary>
+        /// Returns the hiveid of this node
+        /// </summary>
+        /// <returns></returns>
         [HttpGet("address/")]
         public byte[] Address()
         {

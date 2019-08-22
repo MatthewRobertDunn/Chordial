@@ -14,7 +14,6 @@ namespace Hive.Overlay.Kademlia
         NetworkContact Get(KadId toGet);
         int GetCount();
         void Promote(KadId toPromote);
-        void Put(NetworkContact toAdd);
         void Remove(KadId toRemove);
         void AddContact(NetworkContact applicant);
     }

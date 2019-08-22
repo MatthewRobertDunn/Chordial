@@ -29,9 +29,15 @@
         </member>
         <member name="M:Hive.Overlay.Peer.Controllers.RouteController.Address(Hive.Overlay.Peer.Dto.HiveRequest)">
             <summary>
-            
+            Returns the hiveid of this node
             </summary>
             <param name="request"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Hive.Overlay.Peer.Controllers.RouteController.Address">
+            <summary>
+            Returns the hiveid of this node
+            </summary>
             <returns></returns>
         </member>
         <member name="T:Hive.Overlay.Peer.Dto.ClosestNodeSearch">
