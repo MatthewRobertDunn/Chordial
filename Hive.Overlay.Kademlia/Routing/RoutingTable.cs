@@ -158,11 +158,10 @@ namespace Hive.Overlay.Kademlia
                 if (buckets[bucket][i].Address == toRemove)
                 {
                     buckets[bucket].RemoveAt(i);
+                    log.LogInformation($"Removed {toRemove}");
                     return;
                 }
             }
-
-            log.LogInformation($"Removed {toRemove}");
         }
 
 

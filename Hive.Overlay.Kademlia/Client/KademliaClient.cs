@@ -142,7 +142,7 @@ namespace Hive.Overlay.Kademlia
                     log.LogError(ex, $"Could not contact peer {remotePeer}");
                     closestPeerNotAsked.Value.IsNotContactable = true;
                     //If we can't contact this peer, why have them in our routing table?
-                    routingTable.Remove(closestPeerNotAsked.Key);
+                    routingTable.Remove(remotePeer.Address);
                     continue;
                 }
 
