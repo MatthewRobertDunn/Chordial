@@ -1,13 +1,8 @@
-﻿using Hive.Cryptography.Certificates;
-using Hive.Cryptography.Primitives;
-using Hive.Overlay.Api;
+﻿using Hive.Cryptography.Primitives;
 using Hive.Overlay.Peer.Dto;
 using Hive.Storage.Certificates;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace Hive.Overlay.Peer.Controllers
 {
