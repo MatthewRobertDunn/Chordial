@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Hive.Cryptography.Primitives;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.NetworkInformation;
@@ -266,7 +267,7 @@ namespace Hive.Overlay.Kademlia
         /// <returns></returns>
         public override string ToString()
         {
-            return Convert.ToBase64String(Data);
+            return Data.ToBase64();
         }
 
         /// <summary>

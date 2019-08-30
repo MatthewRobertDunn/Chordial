@@ -22,15 +22,19 @@ namespace Hive.Cryptography.Primitives
 
         public static string ToBase64(this byte[] source)
         {
-            return Convert.ToBase64String(source);
+            return Convert.ToBase64String(source)
+                .TrimEnd(new char[] { '=' }).Replace('+', '-').Replace('/', '_');
         }
 
         public static byte[] FromBase64(this string data)
         {
-            if (string.IsNullOrEmpty(data))
-                return new byte[0];
-
-            return Convert.FromBase64String(data);
+            string incoming = data.Replace('_', '/').Replace('-', '+');
+            switch (data.Length % 4)
+            {
+                case 2: incoming += "=="; break;
+                case 3: incoming += "="; break;
+            }
+            return Convert.FromBase64String(incoming);
         }
     }
 }
