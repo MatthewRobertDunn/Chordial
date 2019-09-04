@@ -4,11 +4,29 @@
         <name>Hive.Overlay.Peer</name>
     </assembly>
     <members>
-        <member name="M:Hive.Overlay.Peer.Controllers.CertificateController.Pfx">
+        <member name="T:Hive.Overlay.Peer.Controllers.CertificateController">
             <summary>
-            Returns public keys for this node in the pfx format.
-            Password for the file is 'password'
+            Controller responsible for storing and returning certificates
             </summary>
+        </member>
+        <member name="M:Hive.Overlay.Peer.Controllers.CertificateController.#ctor(Hive.Storage.Certificates.ICertificateRepository,Microsoft.Extensions.Logging.ILogger{Hive.Overlay.Peer.Controllers.CertificateController})">
+            <summary>
+            Construct a new Certificate controller
+            </summary>
+            <param name="certificateRepository"></param>
+            <param name="log">logger</param>
+        </member>
+        <member name="M:Hive.Overlay.Peer.Controllers.CertificateController.Pfx(System.String)">
+            <summary>
+            Returns public keys for a given node in pfx format.
+            Password for the file is '' (empty string)
+            </summary>
+        </member>
+        <member name="M:Hive.Overlay.Peer.Controllers.CertificateController.Store(Hive.Overlay.Peer.Dto.StorePfxCertificate)">
+            <summary>
+            Stores a pkcs12 formatted certificate chain in this node.
+            </summary>
+            <param name="request"></param>
         </member>
         <member name="M:Hive.Overlay.Peer.Controllers.RouteController.CloseContacts(Hive.Overlay.Peer.Dto.ClosestNodeSearch)">
             <summary>   

@@ -58,7 +58,7 @@ namespace Hive.Overlay.Peer
             services.AddSingleton<IKadmeliaServer, KademliaServer>();
 
             //rest client proxy
-            Func<Uri, IKadmeliaServer> serverFactory = uri => new RestClient(uri);
+            Func<Uri, IKadmeliaServer> serverFactory = uri => new KadmeliaServerClient(uri);
             services.AddSingleton(serverFactory);
 
             services.AddSingleton<IKademilaClient, KademliaClient>();
